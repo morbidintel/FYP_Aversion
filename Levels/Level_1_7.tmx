@@ -1,0 +1,241 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<map version="1.0" orientation="orthogonal" width="75" height="15" tilewidth="32" tileheight="32">
+ <properties>
+  <property name="props:Physics:DrawMode" value=""/>
+ </properties>
+ <tileset firstgid="1" name="bricks tileset" tilewidth="32" tileheight="32">
+  <image source="bricks tileset.png" width="224" height="224"/>
+ </tileset>
+ <tileset firstgid="50" name="spikes 32px" tilewidth="32" tileheight="32">
+  <image source="spikes 32px.png" width="64" height="96"/>
+ </tileset>
+ <tileset firstgid="56" name="Streetlight tileset" tilewidth="32" tileheight="32">
+  <image source="Streetlight tileset.png" width="224" height="96"/>
+ </tileset>
+ <layer name="Tile Layer 1" width="75" height="15">
+  <data encoding="base64" compression="zlib">
+   eJztmMsOwiAQRdHGqo3PqEs16j80vhdd2f//IS8xRMQBB1tSq97kJEQRmOlcCgoRVh3QBwPQY7Rl/y5IAq/rEzUEUzADE0Zb9h+BcRWLrZkaoAmiqhdSA/2yB+dgDTZgRbSXINX6192DMt6FuMVVpii//T1Ii/Lbt3twC3Yae3Bh/I6qIZcHQ9V31coYfaga+kUPcnJF1ZCvB1Vu26AlyslziDFdyrQ5UwNX7ej54/hZ5VY//xfd62xjyrzF4p7D2BKDrzLxeL/R5/GNyVWjKrfq/P/qvKH2VvkMDuAITuDMGJO6l5XxDsrF8/1Gn199zpErV0X8wtkndFH3Mttzkesya9DWjixxvBNT7vjO5hdODl3jFpXPfwYJEYfZNt9/Ps9ByeYXam7TL765ugKLFRLe
+  </data>
+ </layer>
+ <objectgroup name="Enemy" width="75" height="15">
+  <object name="Cannabis" type="CannabisSpawn" x="576" y="394">
+   <properties>
+    <property name="props:aggroRadius" value="96"/>
+    <property name="props:chaseRadius" value="96"/>
+    <property name="props:chaseSpeed" value="2"/>
+    <property name="props:enemyType" value="1"/>
+    <property name="props:patrolDirection" value="-1"/>
+    <property name="props:patrolRadius" value="64"/>
+    <property name="props:patrolSpeed" value="1"/>
+   </properties>
+   <ellipse/>
+  </object>
+  <object name="Ground" type="Body" x="544" y="224" width="181" height="19">
+   <properties>
+    <property name="props:IsGround" value=""/>
+    <property name="props:bodyType" value="static"/>
+    <property name="props:friction" value="1"/>
+   </properties>
+  </object>
+  <object name="Ground" type="Body" x="928" y="320" width="96" height="160">
+   <properties>
+    <property name="props:IsGround" value=""/>
+    <property name="props:IsWall" value=""/>
+    <property name="props:bodyType" value="static"/>
+    <property name="props:friction" value="1"/>
+   </properties>
+  </object>
+  <object name="Ground" type="Body" x="992" y="160" width="96" height="160">
+   <properties>
+    <property name="props:IsWall" value=""/>
+    <property name="props:bodyType" value="static"/>
+    <property name="props:friction" value="1"/>
+   </properties>
+  </object>
+  <object name="Ground" type="Body" x="768" y="0" width="384" height="64">
+   <properties>
+    <property name="props:IsGround" value=""/>
+    <property name="props:bodyType" value="static"/>
+    <property name="props:friction" value="1"/>
+   </properties>
+  </object>
+  <object name="Ground" type="Body" x="768" y="128" width="288" height="32">
+   <properties>
+    <property name="props:IsGround" value=""/>
+    <property name="props:bodyType" value="static"/>
+    <property name="props:friction" value="1"/>
+   </properties>
+  </object>
+  <object name="Spikes" type="Body" x="1055" y="132" width="32" height="29">
+   <properties>
+    <property name="props:IsSpike" value=""/>
+    <property name="props:bodyType" value="static"/>
+    <property name="props:bounce" value="1"/>
+    <property name="props:friction" value="1"/>
+   </properties>
+  </object>
+  <object name="Ground" type="Body" x="1376" y="224" width="96" height="32">
+   <properties>
+    <property name="props:IsGround" value=""/>
+    <property name="props:bodyType" value="static"/>
+    <property name="props:friction" value="1"/>
+   </properties>
+  </object>
+  <object name="Ground" type="Body" x="1088" y="448" width="384" height="32">
+   <properties>
+    <property name="props:IsGround" value=""/>
+    <property name="props:bodyType" value="static"/>
+    <property name="props:friction" value="1"/>
+   </properties>
+  </object>
+  <object name="Ground" type="Body" x="800" y="352" width="128" height="128">
+   <properties>
+    <property name="props:IsGround" value=""/>
+    <property name="props:bodyType" value="static"/>
+    <property name="props:friction" value="1"/>
+   </properties>
+  </object>
+  <object name="Ground" type="Body" x="1536" y="288" width="192" height="192">
+   <properties>
+    <property name="props:IsGround" value=""/>
+    <property name="props:bodyType" value="static"/>
+    <property name="props:friction" value="1"/>
+   </properties>
+  </object>
+  <object name="Ground" type="Body" x="1920" y="352" width="224" height="22">
+   <properties>
+    <property name="props:IsGround" value=""/>
+    <property name="props:bodyType" value="static"/>
+    <property name="props:friction" value="1"/>
+   </properties>
+  </object>
+  <object name="Ground" type="Body" x="1728" y="416" width="192" height="64">
+   <properties>
+    <property name="props:IsGround" value=""/>
+    <property name="props:bodyType" value="static"/>
+    <property name="props:friction" value="1"/>
+   </properties>
+  </object>
+  <object name="Ground" type="Body" x="2208" y="288" width="192" height="96">
+   <properties>
+    <property name="props:IsGround" value=""/>
+    <property name="props:bodyType" value="static"/>
+    <property name="props:friction" value="1"/>
+   </properties>
+  </object>
+  <object name="Ground" type="Body" x="1" y="-15" width="2414" height="13">
+   <properties>
+    <property name="props:IsGround" value=""/>
+    <property name="props:bodyType" value="static"/>
+    <property name="props:friction" value="1"/>
+   </properties>
+  </object>
+  <object name="Ground" type="Body" x="1248" y="320" width="84" height="17">
+   <properties>
+    <property name="props:IsGround" value=""/>
+    <property name="props:bodyType" value="static"/>
+    <property name="props:friction" value="1"/>
+   </properties>
+  </object>
+  <object name="Heroin" type="HeroinSpawn" x="1824" y="371">
+   <properties>
+    <property name="props:aggroRadius" value="96"/>
+    <property name="props:attackSpeed" value="1"/>
+    <property name="props:bulletSpeed" value="2"/>
+    <property name="props:enemyType" value="2"/>
+    <property name="props:patrolDirection" value="1"/>
+    <property name="props:patrolRadius" value="64"/>
+    <property name="props:patrolSpeed" value="1"/>
+   </properties>
+   <ellipse/>
+  </object>
+  <object name="swing" type="PendulumSpawn" x="336" y="189">
+   <properties>
+    <property name="props:radius" value="60"/>
+   </properties>
+   <ellipse/>
+  </object>
+ </objectgroup>
+ <objectgroup name="Player" width="75" height="15">
+  <object name="player" type="PlayerSpawn" x="32" y="320">
+   <properties>
+    <property name="props:Player" value=""/>
+    <property name="props:canJump" value=""/>
+    <property name="props:playerImage" value="Images/Main-Char.png"/>
+   </properties>
+   <ellipse/>
+  </object>
+  <object name="Ground" type="Body" x="-10" y="3" width="11" height="474">
+   <properties>
+    <property name="props:IsWall" value=""/>
+    <property name="props:bodyType" value="static"/>
+    <property name="props:friction" value="1"/>
+   </properties>
+  </object>
+  <object name="Ground" type="Body" x="4" y="477" width="1723" height="10">
+   <properties>
+    <property name="props:IsPit" value=""/>
+    <property name="props:bodyType" value="static"/>
+    <property name="props:friction" value="1"/>
+   </properties>
+  </object>
+  <object name="Spikes" type="Body" x="800" y="324" width="128" height="32">
+   <properties>
+    <property name="props:IsSpike" value=""/>
+    <property name="props:bodyType" value="static"/>
+    <property name="props:bounce" value="1"/>
+    <property name="props:friction" value="1"/>
+   </properties>
+  </object>
+ </objectgroup>
+ <objectgroup name="Object Layer 1" width="75" height="15">
+  <object name="Ground" type="Body" x="0" y="352" width="192" height="96">
+   <properties>
+    <property name="props:IsGround" value=""/>
+    <property name="props:bodyType" value="static"/>
+    <property name="props:friction" value="1"/>
+   </properties>
+  </object>
+  <object name="EndPoint" type="EndPointSpawn" x="2368" y="256">
+   <ellipse/>
+  </object>
+ </objectgroup>
+ <objectgroup name="Obstacle" width="75" height="15">
+  <object name="Ground" type="Body" x="736" y="320" width="64" height="160">
+   <properties>
+    <property name="props:IsGround" value=""/>
+    <property name="props:bodyType" value="static"/>
+    <property name="props:friction" value="1"/>
+   </properties>
+  </object>
+  <object name="Ground" type="Body" x="352" y="416" width="384" height="64">
+   <properties>
+    <property name="props:IsGround" value=""/>
+    <property name="props:bodyType" value="static"/>
+    <property name="props:friction" value="1"/>
+   </properties>
+  </object>
+  <object name="Ground" type="Body" x="288" y="160" width="96" height="32">
+   <properties>
+    <property name="props:IsGround" value=""/>
+    <property name="props:bodyType" value="static"/>
+    <property name="props:friction" value="1"/>
+   </properties>
+  </object>
+  <object name="Ground" type="Body" x="1152" y="0" width="96" height="352">
+   <properties>
+    <property name="props:IsWall" value=""/>
+    <property name="props:bodyType" value="static"/>
+    <property name="props:friction" value="1"/>
+   </properties>
+  </object>
+  <object name="Ground" type="Body" x="2400" y="0" width="10" height="480">
+   <properties>
+    <property name="props:IsGround" value=""/>
+    <property name="props:IsWall" value=""/>
+    <property name="props:bodyType" value="static"/>
+    <property name="props:friction" value="1"/>
+   </properties>
+  </object>
+ </objectgroup>
+</map>

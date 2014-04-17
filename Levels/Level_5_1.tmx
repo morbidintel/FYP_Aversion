@@ -1,0 +1,156 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<map version="1.0" orientation="orthogonal" width="317" height="179" tilewidth="32" tileheight="32">
+ <tileset firstgid="1" name="building copy" tilewidth="32" tileheight="32">
+  <image source="building copy.png" width="1280" height="768"/>
+ </tileset>
+ <tileset firstgid="961" name="props_tileset_copy" tilewidth="32" tileheight="32">
+  <image source="props_tileset_copy.png" width="768" height="384"/>
+ </tileset>
+ <tileset firstgid="1249" name="box copy" tilewidth="32" tileheight="32">
+  <image source="box copy.png" width="128" height="128"/>
+ </tileset>
+ <tileset firstgid="1265" name="Crane" tilewidth="32" tileheight="32">
+  <image source="Crane.png" width="1024" height="384"/>
+ </tileset>
+ <tileset firstgid="1649" name="Piston-Platform" tilewidth="32" tileheight="32">
+  <image source="Piston-Platform.png" width="256" height="384"/>
+ </tileset>
+ <layer name="Tile Layer 1" width="317" height="179">
+  <data encoding="base64" compression="zlib">
+   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
+  </data>
+ </layer>
+ <objectgroup name="Object Layer 1" width="317" height="179" visible="0" opacity="0">
+  <object name="Ground" type="Body" x="0" y="5024" width="576" height="704">
+   <properties>
+    <property name="props:IsGround" value=""/>
+    <property name="props:bodyType" value="static"/>
+    <property name="props:friction" value="1"/>
+   </properties>
+  </object>
+  <object name="Ground" type="Body" x="1280" y="1408" width="1632" height="4320">
+   <properties>
+    <property name="props:IsGround" value=""/>
+    <property name="props:bodyType" value="static"/>
+    <property name="props:friction" value="1"/>
+   </properties>
+  </object>
+  <object name="Ground" type="Body" x="2912" y="2016" width="256" height="384">
+   <properties>
+    <property name="props:IsGround" value=""/>
+    <property name="props:bodyType" value="static"/>
+    <property name="props:friction" value="1"/>
+   </properties>
+  </object>
+  <object name="Ground" type="Body" x="2912" y="2400" width="960" height="3328">
+   <properties>
+    <property name="props:IsGround" value=""/>
+    <property name="props:bodyType" value="static"/>
+    <property name="props:friction" value="1"/>
+   </properties>
+  </object>
+  <object name="Ground" type="Body" x="4768" y="3040" width="928" height="2688">
+   <properties>
+    <property name="props:IsGround" value=""/>
+    <property name="props:bodyType" value="static"/>
+    <property name="props:friction" value="1"/>
+   </properties>
+  </object>
+  <object name="Ground" type="Body" x="7584" y="1344" width="1280" height="4384">
+   <properties>
+    <property name="props:IsGround" value=""/>
+    <property name="props:bodyType" value="static"/>
+    <property name="props:friction" value="1"/>
+   </properties>
+  </object>
+  <object name="Ground" type="Body" x="8352" y="1088" width="384" height="256">
+   <properties>
+    <property name="props:IsGround" value=""/>
+    <property name="props:bodyType" value="static"/>
+    <property name="props:friction" value="1"/>
+   </properties>
+  </object>
+  <object name="Ground" type="Body" x="8864" y="2176" width="1280" height="3552">
+   <properties>
+    <property name="props:IsGround" value=""/>
+    <property name="props:bodyType" value="static"/>
+    <property name="props:friction" value="1"/>
+   </properties>
+  </object>
+  <object name="Player" type="PlayerSpawn" x="160" y="4832" width="128" height="128">
+   <properties>
+    <property name="props:Player" value=""/>
+    <property name="props:canJump" value=""/>
+    <property name="props:playerImage" value="Images/Main-Char.png"/>
+   </properties>
+   <ellipse/>
+  </object>
+  <object name="EndPoint" type="EndPointSpawn" x="9888" y="1952" width="192" height="192">
+   <ellipse/>
+  </object>
+  <object name="GUI(Lift)" type="POPUPTUTORIAL" x="608" y="4608" width="416" height="96">
+   <ellipse/>
+  </object>
+  <object name="Erimin" type="EriminSpawn" x="2592" y="1088" width="320" height="320">
+   <properties>
+    <property name="props:Contact Darkeness" value=""/>
+    <property name="props:RollForward when character with certain distance" value=""/>
+   </properties>
+   <ellipse/>
+  </object>
+  <object name="Erimin" type="EriminSpawn" x="6880" y="3936" width="201" height="182">
+   <properties>
+    <property name="props:Contact DARKNESS" value=""/>
+    <property name="props:Roll Toward Character when certain distance" value=""/>
+   </properties>
+   <ellipse/>
+  </object>
+  <object name="Erimin" type="Erimin Spawnpoint" x="8544" y="864" width="224" height="224">
+   <properties>
+    <property name="props:Roll towards chracter when certain distance" value=""/>
+    <property name="props:cotnact darkness" value=""/>
+   </properties>
+   <ellipse/>
+  </object>
+  <object name="GUI(Lift)" type="POPUPTUTORIAL" x="3936" y="2080" width="279" height="48">
+   <ellipse/>
+  </object>
+  <object name="Ground" type="Body" x="0" y="5728" width="10144" height="320">
+   <properties>
+    <property name="props:IsGround" value=""/>
+    <property name="props:IsWall" value=""/>
+    <property name="props:bodyType" value="Static"/>
+    <property name="props:friction 1" value=""/>
+   </properties>
+  </object>
+  <object name="arrow" type="ArrowPointSpawn" x="1024" y="4416">
+   <polygon points="0,0 -128,-160 -256,0"/>
+  </object>
+  <object name="Ground" type="Body" x="5696" y="2912">
+   <properties>
+    <property name="props:IsGround" value=""/>
+    <property name="props:bodyType" value="static"/>
+    <property name="props:friction" value="1"/>
+   </properties>
+   <polygon points="0,0 -256,128 0,128"/>
+  </object>
+  <object name="LIFT" type="LiftMovement" x="704" y="4864" width="256" height="32">
+   <properties>
+    <property name="props:MoveUP" value=""/>
+    <property name="props:When character touch" value=""/>
+   </properties>
+  </object>
+  <object name="PistonLift" type="LIFT" x="3968" y="2688" width="256" height="3040">
+   <properties>
+    <property name="props:Move Down a little when box on contact" value=""/>
+   </properties>
+  </object>
+  <object name="PistonLift2" type="LIFT" x="6048" y="4128" width="1024" height="1600">
+   <properties>
+    <property name="props:Up to fixed level" value=""/>
+    <property name="props:move up when other piston goes down" value=""/>
+   </properties>
+  </object>
+ </objectgroup>
+ <objectgroup name="Player" width="317" height="179"/>
+</map>

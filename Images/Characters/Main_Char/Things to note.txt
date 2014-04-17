@@ -1,0 +1,91 @@
+Character things-to-note:
+
+-Animation length: 50 Frames
+-Size: 128x6400 pixels
+-Frame 1-7(Idle Animation)
+-Frame 1(hold for 2 frames)
+-Frame 3(hold for 3 frames)
+-Frame 7(hold for 3 frames)
+-Frame 8-10(Jump Animation)
+-State 1(Frame 1-10)
+-State 2(Frame 11-20)
+-State 3(Frame 21-30)
+-State 4(Frame 31-40)
+-State 5(Frame 41-50)
+
+Animation Chart:
+-Frame 1
+-Frame 1
+-Frame 2
+-Frame 3
+-Frame 3
+-Frame 3
+-Frame 4
+-Frame 5
+-Frame 6
+-Frame 7
+-Frame 7
+-Frame 7
+-Frame 8
+-Frame 9
+-Frame 10
+-Frame 11
+-Frame 11
+-Frame 12
+-Frame 13
+-Frame 13
+-Frame 13
+-Frame 14
+-Frame 15
+-Frame 16
+-Frame 17
+-Frame 17
+-Frame 17
+-Frame 18
+-Frame 19
+-Frame 20
+-Frame 21
+-Frame 21
+-Frame 22
+-Frame 23
+-Frame 23
+-Frame 23
+-Frame 24
+-Frame 25
+-Frame 26
+-Frame 27
+-Frame 27
+-Frame 27
+-Frame 28
+-Frame 29
+-Frame 30
+-Frame 31
+-Frame 31
+-Frame 32
+-Frame 33
+-Frame 33
+-Frame 33
+-Frame 34
+-Frame 35
+-Frame 36
+-Frame 37
+-Frame 37
+-Frame 37
+-Frame 38
+-Frame 39
+-Frame 40
+-Frame 41
+-Frame 41
+-Frame 42
+-Frame 43
+-Frame 43
+-Frame 43
+-Frame 44
+-Frame 45
+-Frame 46
+-Frame 47
+-Frame 47
+-Frame 47
+-Frame 48
+-Frame 49
+-Frame 50
