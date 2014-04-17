@@ -9,30 +9,43 @@ local scene = storyboard.newScene()
 local widget = require( "widget" )
 local loadsave = require("loadsave")
 
+require("physics"); physics.start()
+
 local screenWidth = display.contentWidth
 local screenHeight = display.contentHeight
-local xMultiplier = display.contentWidth/480  
-local yMultiplier = display.contentHeight/320
+
 local gameData = require("GameData")
-local b_state_changed = false
-local b_state_changed_b = false
+local funcs = require("functions")
+
 local state = 
 {
 	STATE = "Idle",
-	IDLE = "Idle",
+	IDLE = "idle",
 	WALKING = "Walking",
 	JUMPING = "Jumping",
 	MOVING = "Moving", 
 }
-local DIRECTION = 0
+
+local player =
+{
+	direction = 0
+	state = "idle"
+}
+
+local MoveDirection
+{
+	up		= 2,
+	down	= -2,
+	left	= -1,
+	right	= 1
+}
+
 local DIRECTION_LEFT = -1
 local DIRECTION_RIGHT = 1
 local DIRECTION_UP = 2
 local DIRECTION_DOWN = -2
-local FREE_FALL = false
-require("physics")
-physics.start()
-local player, map, visual, layer
+
+local map
 local btnDown = false
 local btnDownTimer = 0
 local holdingBtn = false
@@ -41,7 +54,8 @@ local mapPos =
 {
 	curr = { x = 0, y = 0 },
 	prev = { x = 0, y = 0 },
-	diff = { x = 0, y = 0 }
+	diff = { x = 0, y = 0 },
+	before_touch = { x = 0, y = 0 }
 }
 
 local groupmb = display.newGroup()
@@ -145,7 +159,7 @@ local b_Idle = true
 
 local b_pop = false
 
-
+local touchBeganOn = ""
 
 ---------------------------------------------------------------------------------
 -- 
@@ -159,6 +173,8 @@ local b_pop = false
 ---------------------------------------------------------------------------------
 -- BEGINNING OF YOUR IMPLEMENTATION
 ---------------------------------------------------------------------------------
+
+
 
 local function onButtonEvent(event)
 	
@@ -387,7 +403,7 @@ function scene:createScene( event )
 	-- player
 	local onPlayerSpawnObject = function(object)
 
-		layer = map.layer["Player"]
+		local layer = map.layer["Player"]
 	
 		local charOptions =
 		{
@@ -420,7 +436,7 @@ function scene:createScene( event )
 
 		myCharSheet = graphics.newImageSheet("Images/Characters/Main_Char/PlayerSprite.png", charOptions )
 
-		player = display.newSprite(layer,myCharSheet,sequenceData)
+		funcs.mergeTable( player, display.newSprite(layer,myCharSheet,sequenceData) )
 
 		player.id = "Player"
 		player.x, player.y = object.x, object.y
@@ -761,7 +777,7 @@ function scene:createScene( event )
 
 	local onEndPointSpawnObject = function(object)
 		
-		layer = map.layer["Object Layer 1"]
+		local layer = map.layer["Object Layer 1"]
 		
 		local EndPointOptions =
 		{
@@ -833,7 +849,7 @@ function scene:createScene( event )
 
 		local onArrowSpawnObject = function(object)
 			
-			layer = map.layer["Object Layer 1"]
+			local layer = map.layer["Object Layer 1"]
 			
 			if tutorial.step1 == true then
 				
@@ -896,7 +912,7 @@ function scene:createScene( event )
 
 --	Setting focus on player, for Dusk
 	map.enableFocusTracking(true)
-	map.setCameraFocus(player) 
+	map.setCameraFocus(player)
 	map.setCameraBounds( 
 		{	xMin = screenWidth / 2, xMax = map.data.width - (screenWidth / 2), 
 			yMin = screenHeight / 2, yMax = map.data.height - (screenHeight / 2) } )
@@ -1243,9 +1259,9 @@ function scene:destroyScene( event )
 	
 	display.remove(banner_text)
 	banner_text = nil
-	--visual:removeSelf()
-	--visual = nil
+
 	player:removeSelf()
+
 	if player ~= nil then
 		--player:removeEventListener("touch", onTouchJump)
 		display.remove(player)
@@ -1275,8 +1291,6 @@ function scene:destroyScene( event )
 		popup = nil
 	end
 	
-	display.remove(layer)
-	layer = nil
 	display.remove(obstacleLayer)
 	obstacleLayer = nil
 	display.remove(collectableLayer)
@@ -1863,6 +1877,8 @@ function Update(event)
 	end
 	child = nil
 
+--[[
+-- this chunk is apparently useless so I temp removed it - George
 	--Player motion blur
 	if  ENABLE_PLAYERBLUR == true then--and ENABLE_BLUR == false and ENABLE_DISTORTION == false then
 	
@@ -1888,28 +1904,34 @@ function Update(event)
 		
 	end
 	
-	
-	
---	if layer ~= nil and layer.group ~= nil then
-	if layer ~= nil and layer ~= nil then
-	--	for i=layer.group.numChildren,1, -1 do
+
+	if layer ~= nil then
+
 		for i=layer.numChildren,1, -1 do
 		
-		--	local child = layer.group[i]
 			child = layer[i]
+
 			if child ~= nil and child.id == "mb" then
+				
 				child.alpha = child.alpha * 0.65
 				if child.alpha == 0 then
-					 child.parent:remove( child )
-					 child = nil
-					 collectgarbage( "collect" )
+
+					for i,v in ipairs(layer) do
+						print(i,v)
+					end
+					
+					child.parent:remove( child )
+					child = nil
+					collectgarbage( "collect" )
 				end
+
 			end
-				
+
 		end
+
 	end
 	child = nil
-
+]]
 
 	local vx, vy = player:getLinearVelocity()
 	--Code for player left right movement
@@ -1977,6 +1999,8 @@ function onTouchJump ( event )
 		
 		if event.phase == "began" then
 
+			touchBeganOn = "player"
+
 			lineOrigin.x, lineOrigin.y = player:localToContent( 0, 0 )
 
 			--currentvalue += (finalvalue - currentvalue) * slidespeed
@@ -1995,23 +2019,27 @@ function onTouchJump ( event )
 					
 		elseif event.phase == "moved" then
 				
-			btnDown = true
-			holdingBtn = true
-			if btnDown == true and traject_created == false and tutorial.step1 ~= true then
-				--traject_width = 5		
-				--traject = display.newRect(0,0,traject_width,5)
-				
-			--	traject:setReferencePoint( display.CenterLeftReferencePoint )
-				traject.alpha = 1
-				traject.x = lineOrigin.x + mapPos.curr.x
-				traject.y = lineOrigin.y + mapPos.curr.y - 5
-				traject_created = true
+			if not holdingBtn then
+
+				btnDown = true
+				if btnDown == true and traject_created == false and tutorial.step1 ~= true then
+					--traject_width = 5		
+					--traject = display.newRect(0,0,traject_width,5)
+					
+				--	traject:setReferencePoint( display.CenterLeftReferencePoint )
+					traject.alpha = 1
+					traject.x = lineOrigin.x + mapPos.curr.x
+					traject.y = lineOrigin.y + mapPos.curr.y - 5
+					traject_created = true
+				end
+
 			end
 			
 		elseif event.phase == "ended" then 
 			btnDown = false
 			btnDownTimer = 0
-			holdingBtn = true
+
+			touchBeganOn = ""
 
 		end
 
@@ -2024,16 +2052,21 @@ end
 
 --Function for both click to move, and drag to and release to jump
 local function onTouch(event)
-	
+
 	if storyboard.isPaused == false then
 
 		if player ~= nil  and player.invul == false then
 
 			if event.phase == "began" then 
+
+				touchBeganOn = "screen"
+
 				b_Idle = false
 				player:setFrame(1)
 
 				lineOrigin.x, lineOrigin.y = player:localToContent( 0, 0 )
+
+				mapPos.before_touch.x, mapPos.before_touch.y = map.getViewpoint()
 				
 			elseif event.phase == "moved" then 
 				b_Idle = false
@@ -2066,6 +2099,17 @@ local function onTouch(event)
 					local dir = math.atan2(( event.y - lineOrigin.y ), ( event.x - lineOrigin.x )) * 180 / math.pi
 					traject:rotate(dir - prevAngle )
 					prevAngle = dir
+
+				else
+
+					-- manipulate the screen to look around the map
+					local diff_pos = { x = event.x - event.xStart, y = event.y - event.yStart }
+					local newMapPos = { x = mapPos.before_touch.x - diff_pos.x, y = mapPos.before_touch.y - diff_pos.y }
+
+					print_table(diff_pos)
+
+					map.enableFocusTracking(false)
+					map.positionCamera( newMapPos.x, newMapPos.y )
 				end
 				
 			elseif event.phase == "ended" then 
@@ -2226,6 +2270,10 @@ local function onTouch(event)
 				btnDown = false
 				btnDownTimer = 0
 				holdingBtn = false
+
+				touchBeganOn = ""
+				map.enableFocusTracking(true)
+				map.setCameraFocus(player)
 
 			end -- event.phase check
 

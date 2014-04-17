@@ -47,6 +47,8 @@ for j=1,numOfLevels do
 	M.myTable.levelData[1][j].locked = false
 end
 
+M.myTable = loadsave.loadTable(DATA_FILE) -- This loads the saved table
+
 M.myTable.levelData[1][2].locked = false
 M.myTable.levelData[1][3].locked = false
 M.myTable.levelData[1][4].locked = false
@@ -62,7 +64,5 @@ for i=1,7 do
 end
 
 M.myTable.levelData[1][2].stars = 2
-
-M.myTable = loadsave.loadTable(DATA_FILE) -- This loads the saved table
 
 return M;
