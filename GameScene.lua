@@ -15,7 +15,8 @@ local screenWidth = display.contentWidth
 local screenHeight = display.contentHeight
 
 local gameData = require("GameData")
-local funcs = require("functions")
+
+require("functions")
 
 local state = 
 {
@@ -28,11 +29,11 @@ local state =
 
 local player =
 {
-	direction = 0
+	direction = 0,
 	state = "idle"
 }
 
-local MoveDirection
+local MoveDirection = 
 {
 	up		= 2,
 	down	= -2,
@@ -436,7 +437,8 @@ function scene:createScene( event )
 
 		myCharSheet = graphics.newImageSheet("Images/Characters/Main_Char/PlayerSprite.png", charOptions )
 
-		funcs.mergeTable( player, display.newSprite(layer,myCharSheet,sequenceData) )
+-- causes crash
+		player = mergeTable( player, display.newSprite(layer,myCharSheet,sequenceData) )
 
 		player.id = "Player"
 		player.x, player.y = object.x, object.y

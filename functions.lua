@@ -1,6 +1,4 @@
-functions = {}
-
-function functions.printTable(s, l, i) -- recursive Print (structure, limit, indent)
+function printTable(s, l, i) -- recursive Print (structure, limit, indent)
 
 	l = (l) or 50
 	i = i or ""	-- default item limit, indent string
@@ -27,7 +25,7 @@ function functions.printTable(s, l, i) -- recursive Print (structure, limit, ind
 
 		else
 
-			l = print_table(v, l, i.."["..tostring(k).."]\t")
+			l = printTable(v, l, i.."["..tostring(k).."]\t")
 
 			if (l < 0) then break end
 
@@ -39,28 +37,20 @@ function functions.printTable(s, l, i) -- recursive Print (structure, limit, ind
 
 end
 
-function functions.mergeTable(t1, t2)
+function mergeTable(t1, t2)
 
-    for k,v in pairs(t2) do
+	for k,v in pairs(t2) do
 
-    	if type(v) == "table" then
+		if type(v) == "table" and type(t1[k] or false) == "table" then
 
-    		if type(t1[k] or false) == "table" then
-    			tableMerge(t1[k] or {}, t2[k] or {})
-    		else
-    			t1[k] = v
-    		end
+			mergeTable(t1[k], t2[k])
 
-    	else
+		else
 
-    		t1[k] = v
-    		
-    	end
+			t1[k] = v
 
-    end
+		end
 
-    return t1
+	end
 
 end
-
-return functions
