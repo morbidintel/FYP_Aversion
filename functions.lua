@@ -118,7 +118,7 @@ function isInRange(value, min, max)
 		-- go through all the values in the table
 		for k,v in pairs(value) do
 			-- if one value is not in range, no need to check the rest
-			if not isInRange(v,min,max) return false
+			if not isInRange(v,min,max) then return false end
 		end
 
 		-- all values are in range, return true
