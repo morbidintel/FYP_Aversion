@@ -101,7 +101,8 @@ local mapPos =
 	curr = { x = 0, y = 0 },
 	prev = { x = 0, y = 0 },
 	diff = { x = 0, y = 0 },
-	before_touch = { x = 0, y = 0 }
+	before_touch = { x = 0, y = 0 },
+	delta = { x = 0, y = 0 },
 }
 
 local groupmb = display.newGroup()
@@ -2314,12 +2315,38 @@ local function onTouch(event)
 				btnDownTimer = 0
 				holdingBtn = false
 
-				map.enableFocusTracking(true)
-				map.setCameraFocus(player)
+				-- transition back to original position
+				-- if map is not in the original position before the player looked around
+				if not compareTable(mapPos.curr, mapPos.before_touch) then
+
+					-- initialise the step
+					if touchHandler.isMovingMap then
+						local step = 50
+						mapPos.delta.x = (mapPos.curr.x - mapPos.before_touch.x) / step
+						mapPos.delta.y = (mapPos.curr.y - mapPos.before_touch.y) / step
+					end
+
+					mapPos.curr.x = mapPos.curr.x - mapPos.delta.x
+					mapPos.curr.y = mapPos.curr.y - mapPos.delta.y
+					map.setViewpoint(mapPos.curr.x, mapPos.curr.y)
+
+					print("\tmapPos.curr			: x = " .. mapPos.curr.x .. " y = " .. mapPos.curr.y)
+
+				else -- transitioning ended
+
+					print("transition end")
+
+					mapPos.delta.x, mapPos.delta.y = 0, 0
+					tmapPos.before_touch.x, tmapPos.before_touch.y = 0, 0
+
+					map.enableFocusTracking(true)
+					map.setCameraFocus(player)
+
+				end
 
 				touchHandler:reset()
 
-				if touchHandler.numTouches < 2 then
+				if touchHandler.numTouches < 2 then`
 					map.xScale, map.yScale = 1,1
 					screen.debugText2.text = ""
 				end

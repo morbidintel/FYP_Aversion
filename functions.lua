@@ -114,13 +114,14 @@ end
 -- t = O(n)
 function compareTable(t1, t2, compFunc)
 
+
 	if type(t1) ~= "table" or type(t2) ~= "table" then
 		-- both are not tables
 
 		print("compareTable : invalid parameter(s)")
 		return false
 
-	elseif t1 == t2 then
+	elseif t1 ~= t2 then
 
 		compFunc = compFunc or function(t1,t2) return t1 == t2 end
 
@@ -131,19 +132,19 @@ function compareTable(t1, t2, compFunc)
 
 			if k ~= "__index" then
 				-- metatable ignore __index
-			
+
 				if type(v) == "table" then
 					-- ok they're tables
 
-					if	type(t2[k]) ~= "table" and		-- make sure both are tables
-						v ~= t2[k] and					-- if they don't have the same address
-						not compareTable() then			-- we'll recursively check through their contents
+					if	type(t2[k]) ~= "table" or		-- make sure both are tables
+						v ~= t2[k] or					-- if they don't have the same address
+						not compareTable(v,t2[k],compFunc) then			-- we'll recursively check through their contents
 
 						return false
 
 					end
 
-				elseif not t2[k] or compFunc(v,t2[k]) then		-- they're not tables, check if they're the same
+				elseif t2[k] == nil or not compFunc(v,t2[k]) then		-- they're not tables, check if they're the same
 
 					return false						-- ok not the same, the table doesn't match
 
@@ -249,10 +250,8 @@ function clamp(value, min, max)
 		-- make sure all the stuff we are checking are numbers
 
 		if value < min then
-			print("clamp min", value, min)
 			value = min
 		elseif value > max then
-			print("clamp max", value, max)
 			value = max
 		end
 
