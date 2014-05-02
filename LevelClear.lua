@@ -63,7 +63,7 @@ local function onButtonEvent(event)
 				storyboard.currentLevel = 1
 				gameData.myTable.levelData[2][1].locked = false
 				storyboard.gotoScene("LevelSelect")
-			elseif storyboard.currentWorld == 2 and storyboard.currentLevel == 8 then
+			elseif storyboard.currentWorld == 5 and storyboard.currentLevel == 8 then
 				storyboard.gotoScene("Credits")
 			else
 				storyboard.currentLevel = storyboard.currentLevel + 1

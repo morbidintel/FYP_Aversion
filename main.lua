@@ -25,3 +25,4 @@ storyboard.gotoScene( "MainMenu" )
 
 local bgm = audio.loadStream( "Audios/bgm.mp3" )
 local bgmChn = audio.play( bgm, { channel=1, loops=-1, fadein=5000 } )
+

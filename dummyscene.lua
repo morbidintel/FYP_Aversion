@@ -35,6 +35,7 @@ function scene:createScene( event )
 	storyboard.removeAll()
 	--storyboard.purgeAll()
 	collectgarbage( "collect" )
+	
 	-----------------------------------------------------------------------------
 		
 	--	CREATE display objects and add them to 'group' here.
@@ -53,6 +54,8 @@ function scene:enterScene( event )
 	storyboard.playerHealth = 5
 	storyboard.isPaused = false
 	storyboard.gotoScene("GameScene")
+
+
 	-----------------------------------------------------------------------------
 		
 	--	INSERT code here (e.g. start timers, load audio, start listeners, etc.)
@@ -78,6 +81,7 @@ end
 -- Called prior to the removal of scene's "view" (display group)
 function scene:destroyScene( event )
 	local group = self.view
+
 	
 	-----------------------------------------------------------------------------
 	

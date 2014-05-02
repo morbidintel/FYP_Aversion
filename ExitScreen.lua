@@ -49,6 +49,7 @@ local function onButtonEvent(event)
 		if platformName == "Android" then
 			native.requestExit()
 		end
+		os.exit()
 		return true
 	end
 end
@@ -60,8 +61,8 @@ function scene:createScene( event )
 		
 	platformName = system.platformName
 	
---	bg = display.newImageRect("Images/Others/Exit_game_bg.png",screenWidth,screenHeight)
-	bg = display.newImageRect("Images/test_hires.png",screenWidth,screenHeight)
+	bg = display.newImageRect("Images/Others/Exit_game_bg.png",screenWidth,screenHeight)
+--	bg = display.newImageRect("Images/test_hires.png",screenWidth,screenHeight)
 	
 	--bg:setReferencePoint(display.TopLeftReferencePoint);
 	bg.x = screenWidth * 0.5 ; bg.y = screenHeight * 0.5

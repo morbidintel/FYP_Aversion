@@ -32,6 +32,7 @@ local buttonLock = {}
 local backBtn
 local xStart
 local groupBg
+local prevGroup
 local groupStars = display.newGroup()
 
 local group = display.newGroup()
@@ -117,8 +118,8 @@ function scene:createScene( event )
 	collectgarbage( "collect" )
 	print("GARBAGE : "..collectgarbage("count")/1000)
 	groupBg = display.newGroup()
+	prevGroup = display.newGroup()
 	xStart = 0
-	
 	
 	dots = display.newImageRect("Images/Level_Select_Screen/dots(5).png", 128, 64)
 	dots.x = math.floor(screenWidth/2)
@@ -139,6 +140,7 @@ function scene:createScene( event )
 		bgs[i].x = math.floor(screenWidth * (0.5 + i-1))
 		bgs[i].y = math.floor(screenHeight/2)
 		groupBg:insert(bgs[i])
+		--prevGroup:insert( bgs[i])
  
 	end
 	
@@ -186,6 +188,7 @@ function scene:createScene( event )
 			buttonLock[i][j] = display.newImageRect(myButtonSheet, 17, 64, 80)
 			groupBg:insert(button[i][j])
 			groupBg:insert(buttonLock[i][j])
+
 
 			index = index + 2
 
@@ -366,28 +369,28 @@ end
 function onTouch(event)
 	if event.phase == "began" then 
 		xStart = event.x
-	elseif event.phase == "moved" then 
-		--
-	elseif event.phase == "ended" then 
+
+	else if event.phase == "moved" then 
+	
+
+	elseif event.phase == "ended" or event.phase == "cancelled" then
 		-- previous page
-		if xStart < event.x and event.x - xStart >= 100 then
+		if xStart < event.x and event.x - xStart >= 10 then
 			if currentPage >= 2 then -- min + 1
-				--transition.to(groupStars,{x=groupStars.x + screenWidth,time = 300})
-				transition.to(groupBg, {x = groupBg.x + screenWidth , time=300})
-				dot_yellow.x = dot_yellow.x - 21
+				transition.to(groupBg, { x = groupBg.x + screenWidth , time= 300 })
+				dot_yellow.x = dot_yellow.x - 21 
 				currentPage = currentPage - 1
 			end
 		-- next page
 		elseif xStart > event.x and xStart - event.x >= 100 then
 			if currentPage <= maxPage-1 then -- max - 1
-				--transition.to(groupStars,{x=groupStars.x - screenWidth, time = 300})
-				transition.to(groupBg, {x = groupBg.x - screenWidth, time=300})
+				transition.to(groupBg, { x = groupBg.x - screenWidth, time=300 })
 				dot_yellow.x = dot_yellow.x + 21
-				--dots.x = dots.x - screenWidth--math.floor(screenWidth/2)
 				currentPage = currentPage + 1
 			end
 		end
 	end
+end
 end
 
 Runtime:addEventListener("touch", onTouch)
@@ -449,3 +452,4 @@ scene:addEventListener( "destroyScene", scene )
 ---------------------------------------------------------------------------------
 
 return scene
+

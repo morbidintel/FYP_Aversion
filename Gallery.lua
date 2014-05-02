@@ -266,10 +266,10 @@ function scene:createScene( event )
 		galleryScene[i]:insert(drugIcons[i])
 		galleryScene[i]:insert(scrollView[i])
 	end
-	
+	--[[
 	bg2 = display.newImageRect("Images/Gallery/Aversion_Gallery_Screen_Overlay.png",screenWidth ,screenHeight )
 	bg2.x = screenWidth/2
-	bg2.y = screenHeight/2
+	bg2.y = screenHeight/2]]
 	--screenGroup:insert(bg2)
 	
 	local DotsOptions =

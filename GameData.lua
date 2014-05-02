@@ -57,12 +57,12 @@ M.myTable.levelData[1][8].locked = false
  
 M.myTable.levelData[5][1].locked = false
 
-for i=1,7 do
+--[[for i=1,7 do
 	M.myTable.levelData[1][i].stars = 3 
 end
 
-M.myTable.levelData[1][2].stars = 2
+M.myTable.levelData[1][2].stars = 2]]
 
-M.myTable = loadsave.loadTable(DATA_FILE) -- This loads the saved table
+--M.myTable = loadsave.loadTable(DATA_FILE) -- This loads the saved table
 
 return M;

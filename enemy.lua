@@ -48,6 +48,9 @@ local BULLET_DIRECTION_UP = 2
 local bullets = {}
 local sprays = {}
 local booms = {}
+local shits = {}
+local pendulum = {}
+local pendulumSupport = {}
 
 --local playerHealth = 5
 local playerMaxHealth = 6--5
@@ -349,6 +352,229 @@ function enemy.newInhalant( eindex, etype, x, y, patroldirection, patrolspeed, p
 	}
 	
 	return setmetatable( newenemy, enemy_mt )
+end
+
+local myIceOptions = 
+{
+	width = 48,
+	height = 48,
+	numFrames = 10,
+	sheetContentWidth = 480,
+	sheetContentHeight = 48
+}
+
+local myIceSheet = graphics.newImageSheet("Images/Characters/Ice/Ice_Sprite.png", myIceOptions )
+
+local myIceSequenceData = 
+{
+	{ name = "1", frames = { 1,2 }, time = 500 },
+	{ name = "2", frames = { 3,4 }, time = 500 },
+	{ name = "3", frames = { 5,6 }, time = 500 },
+	{ name = "4", frames = { 7,8 }, time = 500 },
+	{ name = "5", frames = { 9,10 }, time = 500 }
+}
+
+function enemy.newIce( eindex, etype, x, y,  patrolspeed, patrolrad, aggrorad, inMap)
+
+	theMap = inMap
+	local layer = inMap.layer["Enemy"]
+
+	local id = eindex
+	local etype = etype
+	local originalX = x
+	local originalY = y
+	local xpos = x 
+	local ypos = y 
+	local patrolRadius = patrolrad
+	local patrolSpeed = patrolspeed
+	local aggroRadius = aggrorad
+
+	local isDead = false
+
+	--Sprites
+	--local
+	sprite = display.newSprite( myIceSheet, myIceSequenceData )
+	sprite.anchorX, sprite.anchorY = 0.5, 0.5
+	sprite.x, sprite.y = object.x, object.y
+	sprite:setSequence( currentFrame )
+	sprite:play()
+	sprite.alpha = 1
+	sprite.id = eindex
+	sprite.IsIce = true
+	sprite.isDead = false
+	physics.addBody(sprite,{isSensor = true, radius = 18})
+	sprite.isFixedRotation = true
+	sprite.bodyType = "dynamic"
+
+	table.insert( allSprites, sprite)
+
+	local newenemy = 
+	{
+		originalX = originalX,
+		originalY = originalY,
+		xpos = xpos,
+		ypos = ypos,
+		id = id,
+		etype = etype,
+		state = state,
+		isDead = isDead,
+		patrolSpeed = patrolSpeed,
+		patrolRadius = patrolRadius,
+		aggroRadius = aggroRadius,
+
+		sprite = sprite
+	}
+	return setmetatable( newenemy, enemy_mt )
+end
+
+local myPendulumOptions = 
+{
+	width = 100,
+	height = 50,
+	numFrames = 5,
+	sheetContentWidth = 500,
+	sheetContentHeight = 50
+}
+
+local myPendulumSheet = graphics.newImageSheet("Images/Characters/Ice/IceSprite.png", myPendulumOptions)
+local myPendulumSequenceData = 
+{
+	{ name = "1", frames = { 1,2,3,4,5 }, time = 500 },
+	{ name = "2", frames = { 6,7,8,9,10 }, time = 500 },
+	{ name = "3", frames = { 11,12,13,14,15 }, time = 500 },
+	{ name = "4", frames = { 16,17,18,19,20 }, time = 500 },
+	{ name = "5", frames = { 21,22,23,24,25 }, time = 500 },
+}
+
+function enemy.newPendulum ( eindex, etype, inMap)
+
+	local pSprite  = display.newSprite( myPendulumSheet, myPendulumSequenceData )
+
+	pSprite:setSequence(1)
+	pSprite:play()
+	pSprite.wheelX, pSprite.wheelY = object.x, object.y
+	pSprite.radius = ( tonumber(object.props.radius) * 2.8 )
+
+	if object.direction == 2 then
+		pSprite.direction = DIRECTION_RIGHT
+		pSprite.switchiningSide = false
+		pSprite.swingingLeft = false
+		pSprite.swingingRight = true
+		pSprite.degStart = 160
+	else
+
+
+
+	local ropeImage = display.newImageRect("Images/Characters/Ice/Aversion-pendulum-rope.png", 35 * 1.2, pSprite.radius * 0.9 )
+	ropeImage.yScale = -1
+	ropeImage.anchorX, ropeImage.anchorY = 0.5, 0.0
+	ropeImage.x, ropeImage.y = object.x, object.y
+
+	if object.direction == 2 then
+		ropeImage.rotation = 250
+		ropeImage.direction = DIRECTION_RIGHT
+	else
+		ropeImage.rotation = 110
+		ropeImage.direction = DIRECTION_LEFT
+	end
+
+	ropeImage:toBack()
+	ropeImage.switchingSide = true
+	ropeImage.pendulumSupport = 1
+
+	table.insert(pendulumSupport, ropeImage)
+
+	return setmetatable( newenemy, enemy_mt )
+end
+
+local myEriminOptions = 
+{
+	width = 48,
+	height = 48,
+	numFrames = 35, 
+	sheetContentWidth = 1680,
+	sheetContentHeight = 48
+}
+
+local myEriminSheet = graphics.newImageSheet( "Images/Character/Erimin/state_normal.png", myEriminOptions)
+
+local myEriminSequenceData = 
+{
+	{ name = "1", frames = { 1,2,3,4 }, time = 1000 },
+	{ name = "2", frames = { 5,6,7,8 }, time = 1000 },
+	{ name = "3", frames = { 9,10,11,12 }, time = 1000 },
+	{ name = "4", frames = { 13,14,15,16 }, time = 1000 },
+	{ name = "5", frames = { 17,18,19,20 }, time = 1000 },
+	{ name = "6", frames = { 21,22,23,24 }, time = 1000 },
+	{ name = "7", frames = { 25,26,27,28 }, time = 1000 },
+	{ name = "8", frames = { 29,30,31,32 }, time = 1000 },
+	{ name = "9", frames = { 33,34,35 }, time = 1000 }
+}
+
+function enemy.newErimin( eindex, etype, x, y, patroldirection, patrolspeed, patrolrad, aggrorad, chasespeed, chaserad, inMap )
+
+	theMap = inMap
+	local layer = inMap.layer["Enemy"]
+
+	local id = eindex
+	local etype = tonumber(etype)
+	local originalX = x
+	local originalY = y
+	local xpos = x
+	local ypos = y
+	local state = STATE_PATROL
+	local direction = patroldirection
+	local patrolSpeed = patrolspeed
+	local patrolRadius = patrolrad
+	local chaseSpeed = chasespeed
+	local chaseRadius = chaserad
+
+	local isDead = false
+
+	--Sprites
+	--local
+	sprite = display.newSprite( layer, myEriminSheet, myEriminSequenceData )
+	sprite.x = x
+	sprite.y = y
+	sprite.etype = etype
+	--sprite:setSequence(currentFrame)
+	sprite:play()
+	sprite.id = eindex
+	sprite.IsErimin = true
+	sprite.isDead = false
+	--physics.addBody(sprite, {isSensor = true})
+	sprite.isFixedRotation = true
+	sprite.bodyType = "dynamic"
+
+	table.insert(allSprites, sprite)
+
+	local newenemy = 
+	{
+		originalX = originalX,
+		originalY = originalY,
+		xpos = xpos,
+		ypos = ypos,
+		id = id,
+		etype = etype,
+		state = state,
+		direction = direction,
+		patrolSpeed = patrolSpeed,
+		patrolRadius = patrolRadius,
+		aggroRadius = aggroRadius,
+		chaseSpeed = chaseSpeed,
+		chaseRadius = chaseRadius,
+
+		isDead = isDead,
+
+		movingDown = false,
+		movingUp = false,
+
+		sprite = sprite
+	}
+
+	return setmetatable( newenemy, enemy_mt)
+end
+
 end
 
 function enemy:isChasing()
@@ -733,6 +959,142 @@ function enemy:UpdateInhalant( player, map, ii )
 				self.state = STATE_EXPLODING
 			end
 		end
+	end
+end
+
+-- Ice's update
+local ShavedIceOptions = 
+{
+	width = 32,
+	height = 32,
+	numFrames = 3,
+	sheetContentWidth = 96,
+	sheetContentHeight = 32
+}
+
+local myShavedIceSheet = graphics.newImageSheet("Images/Characters/Ice/ShavedIceSprite.png", ShavedIceOptions)
+local sequenceData = 
+{
+	{ name = "1", frames = {1,2,3,1,2,3 }, time = 1000 }
+}
+
+function UpdatePendulum(object, degrees, minAngle, maxAngle)
+
+	if object.direction == DIRECTION_LEFT and object.degStart + degrees <= maxAngle then
+		local rads = (object.degStart + degrees) * (math.pi / 180.0)
+		object.degStart = object.degStart + degrees
+
+		object.x = object.radius * math.cos(rads) + object.wheelX
+		object.y = object.radius * math.sin(rads) + object.wheelY
+		if object.degStart + degrees >= maxAngle then
+			local rads2 = (object.degStart - 1) * (math.pi / 180.0)
+			object.degStart = object.degStart - 1
+			object.x = object.radius * math.cos(rads2) + object.wheelX
+			object.y = object.radius * math.sin(rads2) + object.wheelY
+			object.direction = -object.direction
+		end
+		object.xScale = 1
+
+	elseif object.direction == DIRECTION_RIGHT and object.degStart - degrees >= minAngle then
+		local rads = (object.degStart - degrees) * (math.pi / 180.0)
+		object.degStart = object.degStart - degrees
+
+		object.x = object.radius * math.cos(rads) + object.wheelX
+		object.y = object.radius * math.sin(rads) + object.wheelY
+		if object.degStart + degrees <= minAngle then
+			local rads2 = (object.degStart + 1) * (math.pi / 180.0)
+			object.degStart = object.degStart + 1
+			object.x = object.radius * math.cos(rads2) + object.wheelX
+			object.y = object.radius * math.sin(rads2) + object.wheelY
+			object.direction = -object.direction
+		end
+		object.xScale = -1
+	end
+
+	local t = system.getTimer( )/1000
+	if t - object.last_shit >= 0.40 then
+		object.last_shit = table
+		local sprite = display.newSprite( obstacleLayer.group, myShavedIceSheet, sequenceData )
+		sprite.x = object.x
+		sprite.y = object.y + 40
+		if object.direction == DIRECTION_LEFT then
+			sprite.rotation = -45
+		else
+			sprite.rotation = 45
+		end
+		sprite.IsShavedIce = true
+		physics.addBody(sprite, {isSensor = true})
+
+		sprite:play()
+		table.insert( shits, sprite )
+	end
+	if shits ~= nil then
+		for t = 1, #shits, 1 do
+			if shits[t].frame == 6 then
+				display.remove( shits[t] )
+				table.remove( shits, t )
+				return
+			end
+		end 
+	end
+end
+
+function enemy:UpdateErimin( player, map, ii)
+	if self.state == STATE_PATROL then
+		 if self.xpos < self.originalX + self.patrolRadius and self.direction == DIRECTION_RIGHT then
+		 	self.xpos = self.xpos + self.patrolSpeed-- * getDeltaTime()
+		 	if self.xpos >= self.originalX + self.patrolRadius then
+		 		self.direction = DIRECTION_LEFT
+		 	end
+		end
+
+		if self.xpos > self.originalX - self.patrolRadius and self.direction == DIRECTION_LEFT then
+			self.xpos = self.xpos - self.patrolSpeed
+			if self.xpos <= self.originalX - self.patrolRadius then
+				self.direction = DIRECTION_RIGHT
+			end
+		end
+		--End of Left-Right movement
+
+		if math.abs(self.ypos - player.y) <= 32 then
+			if math.abs(self.xpos - plyer.x) <= self.aggroRadius then
+				if player.x >= math.abs(self.originalX - self.patrolRadius*2) and player.x <= math.abs(self.originalX + self.patrolRadius*2) then
+					self.state = STATE_CHASING
+					--Changing the animation
+					for i = #allSprites, 1, -1 do
+						if allSprites[i].id == ii then
+							allSprites[i]:setSequence( (playerMaxHealth - player.playerHealth) *2 )
+							allSprites[i]:play()
+							break
+						end
+					end
+				end
+			end
+		end
+
+	elseif self.state == STATE_CHASING then
+		if (player.x - self.xpos) >= 0 then
+			self.direction = DIRECTION_LEFT
+		else
+			self.direction = DIRECTION_RIGHT
+		end
+
+		self.xpos = self.xpos - ( self.chaseSpeed * self.direction)
+
+		if math.abs(self.ypos - player.y) >= 32 or 
+			math.abs(self.xpos - self.originalX) >= self.chaseRadius then
+			self.state = STATE_PATROL
+			--Changing the Animation
+			for i = #allSprites, 1, -1 do
+				if allSprites[i].id == ii then
+					allSprites[i]:setSequence( (playerMaxHealth - player.playerHealth)*2 - 1)
+					allSprites[i]:play()
+					break
+				end
+			end
+		end
+	else
+		print( "Error in UpdateErimin" )
 	end
 end
 

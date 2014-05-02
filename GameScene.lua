@@ -361,9 +361,7 @@ function scene:createScene( event )
 					end
 
 				end
-
 			end
-
 			if objects then
 			
 				-- Loop through all the objects
@@ -383,7 +381,6 @@ function scene:createScene( event )
 		end
 		
 	end
-	
 	-- player
 	local onPlayerSpawnObject = function(object)
 
@@ -419,7 +416,7 @@ function scene:createScene( event )
 		}
 
 		myCharSheet = graphics.newImageSheet("Images/Characters/Main_Char/PlayerSprite.png", charOptions )
-
+         
 		player = display.newSprite(layer,myCharSheet,sequenceData)
 
 		player.id = "Player"
@@ -440,6 +437,7 @@ function scene:createScene( event )
 
 		if object.props.IsPit == true then
 			object.IsPit = true
+
 		end
 
 	end
@@ -512,7 +510,7 @@ function scene:createScene( event )
 	end
 	AddInitFunction("SpinBladeSpawn", onSpinBladeSpawnObject)
 	
-	local onPendulumSpawnObject = function(object)
+	--[[local onPendulumSpawnObject = function(object)
 	
 		local PendulumOptions = 
 		{
@@ -523,7 +521,7 @@ function scene:createScene( event )
 			sheetContentHeight = 50
 		}
 		
-		local myPendulumSheet = graphics.newImageSheet("Images/IceSprite.png", PendulumOptions)
+		local myPendulumSheet = graphics.newImageSheet("Images/Characters/Ice/IceSprite.png", PendulumOptions)
 		local SequenceData =
 		{
 			{ name = "1", frames={ 1,2,3,4,5 }, time = 500 },
@@ -568,7 +566,7 @@ function scene:createScene( event )
 		pSprite.bodyType = "static"
 		table.insert(pendulum, pSprite)
 		
-		local ropeImage = display.newImageRect("Images/Aversion-pendulum-rope.png", 35 * 1.2, pSprite.radius * 0.9 )
+		local ropeImage = display.newImageRect("Images/Characters/Ice/Aversion-pendulum-rope.png", 35 * 1.2, pSprite.radius * 0.9 )
 
 		ropeImage.yScale = -1
 		ropeImage.anchorX, ropeImage.anchorY = 0.5, 0.0
@@ -589,7 +587,7 @@ function scene:createScene( event )
 		table.insert(pendulumSupport, ropeImage)
 
 	end
-	AddInitFunction("PendulumSpawn", onPendulumSpawnObject)
+	AddInitFunction("PendulumSpawn", onPendulumSpawnObject)]]
 	
 	
 	local onCrateSpawnObject = function(object)
@@ -604,7 +602,6 @@ function scene:createScene( event )
 		cSprite.x, cSprite.y = object.x, object.y
 		cSprite.IsCrate = true
 		cSprite.IsGround = true
-
 		physics.addBody(cSprite, { density = 2, friction = 0.4, isSensor = false })
 		cSprite.gravityScale = 2
 		cSprite.bodyType = "dynamic"
@@ -673,49 +670,16 @@ function scene:createScene( event )
 	
 	local onIceSpawnObject = function(object)
 
-		local IceOptions =
-		{
-			width = 48,
-			height = 48,
-			numFrames = 10,
-			sheetContentWidth = 480,
-			sheetContentHeight = 48
-		}
-
-		local myIceSheet = graphics.newImageSheet("Images/Characters/Ice/Ice_Sprite.png",IceOptions )
-
-		local sequenceData =
-		{
-			{ name = "1", frames={ 1,2 }, time = 500 },Aversion-level-select-button-sprite
-			{ name = "2", frames={ 3,4 }, time = 500 },
-			{ name = "3", frames={ 5,6 }, time = 500 },
-			{ name = "4", frames={ 7,8 }, time = 500 },
-			{ name = "5", frames={ 9,10 }, time = 500 }
-		}
-
-		local iceSprite = display.newSprite( myIceSheet, sequenceData )
-		iceSprite.anchorX, iceSprite.anchorY = 0.5, 0.5
-		iceSprite.x, iceSprite.y = object.x, object.y
-		iceSprite:setSequence(currentFrame)
-		iceSprite:play()
-		iceSprite.alpha = 1
-		iceSprite.id = eindex
-	
-		iceSprite.isDead = false
-
-		physics.addBody(iceSprite,{isSensor = true, radius = 18})
-
-		sprite.isFixedRotation = true
-
-		local temp = enemy.new( object.x, object.y, 
+		local ice = enemy.newIce( object.x, object.y, 
 								tonumber(object.props.enemyType), 
 								tonumber(object.props.patrolRadius), 
 								tonumber(object.props.aggroRadius), eindex, 
 								tonumber(object.props.patrolSpeed))	
-		temp.id = eindex
+		ice.id = eindex
 		eindex = eindex + 1
-		temp.isFixedRotation = true
-		table.insert(enemyList, temp)
+		ice.isFixedRotation = true
+		table.insert(enemyList, ice)
+		--physics.addBody( heroin.sprite, "dynamic", { density = 2.0, friction = 0.9, bounce = 0.2, radius = 14 } )
 
 	end
 	AddInitFunction("IceSpawn", onIceSpawnObject)
@@ -866,7 +830,6 @@ function scene:createScene( event )
 			handicon.alpha = 0
 			handicon.isPlaying = false
 			
-			
 			--transition.to(handicon,{x=screenWidth * 0.58,y=handicon.y-150,time=1600})
 
 			physics.addBody(redArrow,{isSensor = true,radius = 24})
@@ -959,36 +922,38 @@ function scene:createScene( event )
 	}
 	
 	HeartSprite1 = display.newSprite( HeartSheet, sequenceData )
-	HeartSprite1.x = 160+15
-	HeartSprite1.y = 32+5
+	HeartSprite1.x = 148+15
+	HeartSprite1.y = 24+5
 	HeartSprite1.xScale = 0.5
 	HeartSprite1.yScale = 0.5
 	HeartSprite1:play()
 	
 	HeartSprite2 = display.newSprite( HeartSheet, sequenceData )
-	HeartSprite2.x = 128+15
-	HeartSprite2.y = 32+5
+	HeartSprite2.x = 116+15
+	HeartSprite2.y = 24+5
 	HeartSprite2.xScale = 0.5
 	HeartSprite2.yScale = 0.5
 	HeartSprite2:play()
 	
 	HeartSprite3 = display.newSprite( HeartSheet, sequenceData )
-	HeartSprite3.x = 96+15
-	HeartSprite3.y = 32+5
+	HeartSprite3.x = 84+15
+	HeartSprite3.y = 24+5
 	HeartSprite3.xScale = 0.5
 	HeartSprite3.yScale = 0.5
 	HeartSprite3:play()
 	
 	HeartSprite4 = display.newSprite( HeartSheet, sequenceData )
-	HeartSprite4.x = 64+15
-	HeartSprite4.y = 32+5
+	HeartSprite4.x = 50+15
+	HeartSprite4.y = 24+5
 	HeartSprite4.xScale = 0.5
 	HeartSprite4.yScale = 0.5
 	HeartSprite4:play()
 
 	HeartSprite5 = display.newSprite( HeartSheet, sequenceData )
-	HeartSprite5.x = 32+10
-	HeartSprite5.y = 32+5
+	HeartSprite5.x = 17+15
+	HeartSprite5.y = 24+5	
+	HeartSprite5.xScale = 0.5
+	HeartSprite5.yScale = 0.5
 	HeartSprite5:play()
 	
 	
@@ -1071,7 +1036,7 @@ function scene:createScene( event )
 		banner_text.alpha = 0
 		banner_bg.alpha = 0
 	end
-	storyboard.firstEntry = false
+	storyboard.firstEntry = true
 	
 	local tapOptions =
 	{
@@ -1120,10 +1085,7 @@ function scene:enterScene( event )
 	--	INSERT code here (e.g. start timers, load audio, start listeners, etc.)
 	
 	-----------------------------------------------------------------------------
-	
-
 end
-
 
 -- Called when scene is about to move offscreen:
 function scene:exitScene( event )
@@ -1136,7 +1098,6 @@ function scene:exitScene( event )
 	-----------------------------------------------------------------------------
 	
 end
-
 
 -- Called prior to the removal of scene's "view" (display group)
 function scene:destroyScene( event )
@@ -1151,7 +1112,6 @@ function scene:destroyScene( event )
 	
 	-----------------------------------------------------------------------------
 
-	
 	local group = self.view
 	
 	if map ~= nil then
@@ -1310,8 +1270,8 @@ function scene:destroyScene( event )
 
 end
 
-
-local ShavedIceOptions = 
+--Ice's Attack
+--[[local ShavedIceOptions = 
  {
 	width = 32,
 	height = 32,
@@ -1319,7 +1279,7 @@ local ShavedIceOptions =
 	sheetContentWidth = 96,
 	sheetContentHeight = 32
 }
-local myShavedIceSheet = graphics.newImageSheet("Images/ShavedIceSprite.png", ShavedIceOptions )
+local myShavedIceSheet = graphics.newImageSheet("Images/Characters/Ice/ShavedIceSprite.png", ShavedIceOptions )
 local sequenceData = 
 {
 	{ name = "1", frames={ 1,2,3,1,2,3 }, time = 1000 }
@@ -1389,7 +1349,7 @@ local function UpdatePendulum(object, degrees, minAngle, maxAngle)
 		end
 	end
 end
-
+]]
 
 function UpdateObstacles()
 
@@ -1624,7 +1584,7 @@ function Update(event)
 	-- temp
 	if storyboard.playerHealth == 4 then
 		display.remove(HeartSprite1)
-	elseif storyboard.playerHealth == 3 then
+	elseif storyboard.playerHealth == 3 then  
 		display.remove(HeartSprite2)
 	elseif storyboard.playerHealth == 2 then
 		display.remove(HeartSprite3)
@@ -2153,7 +2113,7 @@ local function onTouch(event)
 						tutorial_Bg3 = display.newImageRect("Images/Visual_Feedback/Tutorial/land.png",192,64)
 						tutorial_Bg3.x = screenWidth*0.5
 						tutorial_Bg3.y = screenHeight*0.7
-						transition.to(tutorial_Bg3,{alpha = 0,time = 4500})
+						transition.to(tutorial_Bg3,{alpha = 0, time = 5000 })
 						
 						--handicon:removeSelf()
 						if handicon~= nil then
@@ -2350,7 +2310,7 @@ function onCollision( event )
 			state.STATE = state.IDLE
 			ENABLE_PLAYERBLUR = false
 			transition.to(player,{x=event.other.x,time=300,onComplete = listener1})
-
+--[[
 		elseif event.other.IsPit then
 			print("Hit Pit")
 			
@@ -2453,7 +2413,7 @@ function onCollision( event )
 					ENABLE_REVERSE = true
 					
 					questionMark.alpha = 1
-					questionMark:play()
+					questionMarkplay()
 					
 					player.invul = true
 					
@@ -2464,7 +2424,7 @@ function onCollision( event )
 					timer.performWithDelay( 1000, listener )
 				end
 			end
-			
+			]]
 		elseif event.other.IsInhalant == true then
 			print("Hit by Inhalant")
 
@@ -2560,16 +2520,15 @@ function onCollision( event )
 					for i=1,storyboard.playerHealth do
 						pauseBtn.alpha = 0
 					end
-					
-					
+						
 					local listener1 = function()
-						if item ~= nil then--and item.isDead == false then
+						if item ~= nil then
 							item.isDead = true
-							--item:removeSelf()
-							display.remove(item)
+							item:removeSelf()
 							print("item id "..item.id)
 							enemyList[item.id].Destroy()
 							table.remove(enemyList, item.id)
+							display.remove( item )  
 							item = nil
 						end
 					end
@@ -2581,19 +2540,19 @@ function onCollision( event )
 		print("Hit by Bullet")
 			if player.invul == false then
 				local item = event.other
-				if item ~= nil then
+				if item == nil then 
 					decreaseHealthEnemy(1)
 					
 				if (storyboard.isVibrateOn) then -- Check if the checkbox is on
 					print( "Vibrate the device" )
 					system.vibrate() -- Vibrate the device
-				end
-					
+				
 					ENABLE_DISTORTION = true
-					
+					end
 					for i=1,storyboard.playerHealth do
 						pauseBtn.alpha = 0
 					end
+					item = nil
 				end
 			end
 			
@@ -2615,14 +2574,13 @@ function onCollision( event )
 					questionMark.alpha = 1
 					questionMark:play()
 					
-					
 					local listener1 = function()
 						if item ~= nil then
 							item.isDead = true
-							item:removeSelf( )
+							item:removeSelf()
 							display.remove(item)
 							enemyList[item.id].Destroy()
-							table.remove(enemyList, item.id)
+							--table.remove(enemyList, item.id)
 							item = nil
 						end				
 					end
@@ -2851,6 +2809,7 @@ function decreaseHealthEnemy(h)
 			end
 
 			storyboard.isPaused = true
+
 		end
 	
 		life = playerMaxHealth - storyboard.playerHealth + 1
@@ -2999,7 +2958,6 @@ function onKeyEvent( event )
          masterVolume = masterVolume - 0.1 -- Decrease the volume by 0.1 whenever down key is pressed.
          audio.setVolume( masterVolume ) -- Set the new mastervolume affter decreasing the volume.
       end
-
    end
    return true  --SEE NOTE BELOW
 end

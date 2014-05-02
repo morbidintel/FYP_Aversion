@@ -122,7 +122,7 @@ function scene:createScene( event )
 		height = 72
 	}
 ]]--
-	local bg = display.newImageRect("Images/UI_Screen/setting_screen_only/settings.png",screenWidth ,screenHeight);
+	local bg = display.newImageRect("Images/UI_Screen/Settings_Screen/settings.png",screenWidth ,screenHeight);
 	bg.x = screenWidth / 2
 	bg.y = screenHeight / 2
 	screenGroup:insert(bg)
@@ -132,8 +132,8 @@ function scene:createScene( event )
 	slider[1] = widget.newSlider
 	{
 		id = "bgm",
-		top = screenHeight * 0.46,
-		left = screenWidth * 0.283,
+		top = screenHeight * 0.81,
+		left = screenWidth * 0.260,
 		width = screenWidth * 0.49,
 		listener = sliderListener,
 		value = audio.getVolume() * 100
@@ -152,8 +152,8 @@ function scene:createScene( event )
 	--Checkbox for vibration
 	checkboxButton = widget.newSwitch
 	{
-		top = screenHeight * 0.65,--0.74,
-		left = screenWidth * 0.49,
+		top = screenHeight * 0.505,--0.74,
+		left = screenWidth * 0.48,
 		initialSwitchState = storyboard.isVibrateOn, -- Set the vibration mode to "On" at the start.
 		style = "checkbox",
 		id = "Checkbox button",

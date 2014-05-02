@@ -92,7 +92,7 @@ function scene:createScene( event )
 		sheetContentHeight = 36
 	}
 	
-	local myPauseScreenSheet = graphics.newImageSheet("Images/ok_button.png",pauseScreenOptions )
+	local myPauseScreenSheet = graphics.newImageSheet("Images/Others/ok_button.png",pauseScreenOptions )
 	
 	button = widget.newButton
 	{
@@ -107,7 +107,7 @@ function scene:createScene( event )
 	
 	myPauseScreenSheet = nil
 	
-	button.x = screenWidth*0.50
+	button.x = screenWidth*0.75
 	button.y = screenHeight*0.80
 end
 
