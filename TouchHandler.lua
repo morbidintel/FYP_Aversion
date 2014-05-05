@@ -53,8 +53,6 @@ function touchHandler:addTouch(t)
 
 	self.numTouches = #self.touches
 
-	print("touch added")
-
 	touchHandler.activeTouch = t
 
 	return setmetatable(t, touch_mt)
@@ -81,8 +79,6 @@ function touchHandler:removeTouch(t, found)
 
 		if self.compareTouch(self.activeTouch,t) then self.activeTouch = nil end
 		if self.compareTouch(self.lastActiveTouch,t) then self.lastActiveTouch = nil end
-
-		print("touch removed")
 
 	end
 
@@ -152,15 +148,12 @@ function mt:__newindex(key, value)
 			-- removing activeTouch, push lastActive to active
 			mt.activeTouch = mt.lastActiveTouch
 			mt.lastActiveTouch = nil
-			--	print("remove activeTouch")
 			return
 		elseif not touchHandler.compareTouch(value, mt.activeTouch) then
 			-- incoming touch is from different finger
 			-- push current active touch to lastActive			
 			mt.lastActiveTouch = mt.activeTouch
-		--		print("new activeTouch")
 		--	else
-		--		print("update activeTouch")
 		end
 
 		-- set incoming touch as active

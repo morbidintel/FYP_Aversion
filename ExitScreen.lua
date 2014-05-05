@@ -49,6 +49,7 @@ local function onButtonEvent(event)
 		if platformName == "Android" then
 			native.requestExit()
 		end
+		os.exit()
 		return true
 	end
 end
@@ -60,10 +61,8 @@ function scene:createScene( event )
 		
 	platformName = system.platformName
 	
---	bg = display.newImageRect("Images/Others/Exit_game_bg.png",screenWidth,screenHeight)
-	bg = display.newImageRect("Images/test_hires.png",screenWidth,screenHeight)
-	
-	--bg:setReferencePoint(display.TopLeftReferencePoint);
+	bg = display.newImageRect("Images/Others/Exit_game_bg.png",screenWidth,screenHeight)
+
 	bg.x = screenWidth * 0.5 ; bg.y = screenHeight * 0.5
 	
 
@@ -119,7 +118,6 @@ end
 -- Called immediately after scene has moved onscreen:
 function scene:enterScene( event )
 	local screenGroup = self.view
-	print( "1: enterScene event" )
 	
 end
 
@@ -143,8 +141,6 @@ end
 
 -- Called prior to the removal of scene's "view" (display group)
 function scene:destroyScene( event )
-	
-	print( "((destroying scene 1's view))" )
 end
 
 ---------------------------------------------------------------------------------

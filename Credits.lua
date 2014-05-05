@@ -50,6 +50,8 @@ end
 function scene:createScene( event )
 	local screenGroup = self.view
 	--local params = event.params
+
+	storyboard.removeAll( )
 		
 	platformName = system.platformName
 
@@ -68,20 +70,22 @@ function scene:createScene( event )
 
 	screenGroup:insert(button)
 	
-	button2 = widget.newButton
-	{
-		defaultFile = "Images/Screen/Win-screen-vector.png",
-		id = "next_btn",
-		onRelease = onButtonEvent,
-		width = screenWidth,
-		height = screenHeight
-	}
-		--button[i].alpha = 0
+	--	button2 = widget.newButton
+	--	{
+	--		defaultFile = "Images/Screen/Win-screen-vector.png",
+	--		id = "next_btn",
+	--		onRelease = onButtonEvent,
+	--		width = screenWidth,
+	--		height = screenHeight
+	--	}
+	--		--button[i].alpha = 0
 		
-	button2.x = screenWidth / 2
-	button2.y = screenHeight / 2
+	--	button2.x = screenWidth / 2
+	--	button2.y = screenHeight / 2
 
-	screenGroup:insert(button2)
+--	screenGroup:insert(button2)
+
+	media.playVideo("Images/Screen/cannibis.mp4", false, function()end)
 	
 end
 
@@ -89,7 +93,6 @@ end
 -- Called immediately after scene has moved onscreen:
 function scene:enterScene( event )
 	local screenGroup = self.view
-	print( "1: enterScene event" )
 
 end
 
@@ -111,8 +114,6 @@ end
 
 -- Called prior to the removal of scene's "view" (display group)
 function scene:destroyScene( event )
-	
-	print( "((destroying scene 1's view))" )
 end
 
 ---------------------------------------------------------------------------------

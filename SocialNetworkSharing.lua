@@ -26,6 +26,11 @@ local twitter = require("Social Network.Twitter")
 twitter.consumer_key = "MRHJT6ocah8j5O8xs5NlRDm2I"
 twitter.consumer_secret = "iMU0xwdWLsOAOg89kWV87hg48LGCVBIr5bI6ZpLTYgwxzmlJBY"
 
+local CurrentStage = storyboard.currentStage
+local StarsForThisStage = gameData.GetStarsForStage(CurrentStage)
+
+local Message = "I've earned " .. StarsForThisStage .. " stars for Stage " .. CurrentStage .. " in Aversion!"
+
 local bg =
 {
 	black = {},
@@ -61,7 +66,6 @@ end
 ---------------------------------------------------------------------------------
 
 local function facebook_press(event)
-	print("facebook press")
 
 	if hasShared.facebook then
 		bg.words.text = "Already shared to Facebook"
@@ -84,7 +88,7 @@ local function facebook_press(event)
 
 	local function onLoginComplete(event)
 		if event.phase == "login" then
-			facebook.request( "me/feed", "POST", { message = "test" }, onRequestComplete )
+			facebook.request( "me/feed", "POST", { message = Message }, onRequestComplete )
 		else
 			bg.words.text = "Facebook login failed!"
 		end
@@ -94,7 +98,6 @@ local function facebook_press(event)
 end
 
 local function twitter_press(event)
-	print("twitter press")
 
 	if hasShared.twitter then
 		bg.words.text = "Already shared to Twitter"
@@ -124,22 +127,19 @@ local function twitter_press(event)
 	end
 
 	local time = os.date ("*t")
-	local value = "Posted from Corona SDK at " .. time.hour .. ":"
-			.. time.min .. "." .. time.sec
 
 	local params = 
 	{
 		"tweet",
 		"statuses/update.json",
 		"POST",
-		{ "status", value }
+		{ "status", Message }
 	}
 
 	twitter.tweet(callback, params)
 end
 
 local function skip_press(event)
-	print("skip press")
 	storyboard.hideOverlay("SocialNetworkSharing")
 	storyboard.showOverlay("LevelClear")
 end

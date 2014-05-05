@@ -26,6 +26,8 @@ local screen = const_table
 	originalWidth = 480,
 	originalHeight = 360,
 
+	bDebug = true,
+
 	debugText = display.newText
 	{ 
 		text = "",
@@ -103,6 +105,7 @@ local mapPos =
 	diff = { x = 0, y = 0 },
 	before_touch = { x = 0, y = 0 },
 	delta = { x = 0, y = 0 },
+	isTransitioning = false,
 }
 
 local groupmb = display.newGroup()
@@ -222,7 +225,6 @@ local function onButtonEvent(event)
 	if btn.id == "pause_btn" then
 		
 		if holdingBtn == true then
-			print("stupid onButtonEvent shit")
 			traject.width = 5
 			traject.alpha = 0
 			traject.x = player:localToContent( 0, 0 ).x
@@ -238,6 +240,7 @@ local function onButtonEvent(event)
 		else
 			physics:start()
 			storyboard.isPaused = false
+			storyboard.hideOverlay( "PauseScreen" )
 		end
 		
 	end
@@ -264,9 +267,9 @@ function scene:createScene( event )
 	
 	Runtime:addEventListener("enterFrame", Update)
 	
-	mapfilename = "Levels/Level_"..storyboard.currentWorld.."_"..storyboard.currentLevel..".json"
---	mapfilename = "Levels/Level_"..storyboard.currentWorld.."_"..storyboard.currentLevel..".tmx" -- Lime
-	print("current world : "..storyboard.currentWorld.." current level : "..storyboard.currentLevel)
+	mapfilename = "Levels/Level_"..storyboard.currentStage.."_"..storyboard.currentLevel..".json"
+--	mapfilename = "Levels/Level_"..storyboard.currentStage.."_"..storyboard.currentLevel..".tmx" -- Lime
+	print("current world : "..storyboard.currentStage.." current level : "..storyboard.currentLevel)
 	print("Map filename : " .. mapfilename)
 
 
@@ -319,7 +322,7 @@ function scene:createScene( event )
 	--1 this change the background according to the player's health
 	currentFrame = playerMaxHealth - storyboard.playerHealth + 1
 	
-	if storyboard.currentWorld == 1 then
+	if storyboard.currentStage == 1 then
 		--local myImgSheet = graphics.newImageSheet("Images/UI Screen/scrollable bg layers/Combined-BG-Sprite.png",imgOptions )
 		local myImgSheet = graphics.newImageSheet("Images/UI_Screen/scrollable_bg_layers/Aversion-bg-base-final-sprite.png",imgOptions )
 		local myImgSheet2 = graphics.newImageSheet("Images/UI_Screen/scrollable_bg_layers/Aversion-bg-front-final-sprite2.png",imgOptions2 )
@@ -343,11 +346,11 @@ function scene:createScene( event )
 		bgFront[2].x = screen.width + screen.width * 0.5
 	end
 	
-	if storyboard.currentWorld >= 2 then
+	if storyboard.currentStage >= 2 then
 
 		local myImgSheet6_filename
 
-		if storyboard.currentWorld == 5 then
+		if storyboard.currentStage == 5 then
 			myImgSheet6_filename = "Images/UI_Screen/scrollable_bg_layers/BG_Sprite_5.png"
 		else
 			myImgSheet6_filename = "Images/UI_Screen/scrollable_bg_layers/Level2/BG_Sprite.png"
@@ -445,11 +448,11 @@ function scene:createScene( event )
 	
 		local charOptions =
 		{
-			width = 36,
-			height = 36,
+			width = 32,
+			height = 32,
 			numFrames = 50,
-			sheetContentWidth = 1800,
-			sheetContentHeight = 36
+			sheetContentWidth = 1600,
+			sheetContentHeight = 32
 		}
 
 		local sequenceData =
@@ -547,7 +550,7 @@ function scene:createScene( event )
 
 		local mySpinBladeSheet
 
-		if storyboard.currentWorld == 1 then
+		if storyboard.currentStage == 1 then
 			mySpinBladeSheet = graphics.newImageSheet( "Images/Aversion-spinning-blade-animation-sprite.png",spinBladeOptions )
 		else
 			mySpinBladeSheet = graphics.newImageSheet( "Images/Spinning-blade-animation-sprite2.png",spinBladeOptions )
@@ -846,8 +849,8 @@ function scene:createScene( event )
 
 		local sprite
 
-		if storyboard.currentWorld == 1 and storyboard.currentLevel == 8 
-		or storyboard.currentWorld == 2 and storyboard.currentLevel == 8 then
+		if storyboard.currentStage == 1 and storyboard.currentLevel == 8 
+		or storyboard.currentStage == 2 and storyboard.currentLevel == 8 then
 			sprite = display.newSprite( myEndPointSheet, sequenceData )
 		else
 			sprite = display.newSprite( layer, myEndPointSheet, sequenceData )
@@ -874,7 +877,7 @@ function scene:createScene( event )
 		popup.x = object.x
 		popup.y = object.y - 32
 		popup.IsPopup = true
-		if storyboard.currentWorld == 1 then
+		if storyboard.currentStage == 1 then
 			if storyboard.currentLevel == 2 then
 				popup.text = "cannabis"
 			elseif storyboard.currentLevel == 3 then
@@ -892,7 +895,7 @@ function scene:createScene( event )
 	AddInitFunction("PopupSpawn", onPopupSpawnObject)
 	
 	--Code for custom tutorial for first level
-	if storyboard.currentLevel == 1 and  storyboard.currentWorld == 1 then
+	if storyboard.currentLevel == 1 and  storyboard.currentStage == 1 then
 		isTutorial = true
 		tutorial.step1 = true
 		tutorial.step2 = false
@@ -1009,36 +1012,38 @@ function scene:createScene( event )
 	}
 	
 	HeartSprite1 = display.newSprite( HeartSheet, sequenceData )
-	HeartSprite1.x = 160+15
-	HeartSprite1.y = 32+5
+	HeartSprite1.x = 163
+	HeartSprite1.y = 29
 	HeartSprite1.xScale = 0.5
 	HeartSprite1.yScale = 0.5
 	HeartSprite1:play()
 	
 	HeartSprite2 = display.newSprite( HeartSheet, sequenceData )
-	HeartSprite2.x = 128+15
-	HeartSprite2.y = 32+5
+	HeartSprite2.x = 131
+	HeartSprite2.y = 29
 	HeartSprite2.xScale = 0.5
 	HeartSprite2.yScale = 0.5
 	HeartSprite2:play()
 	
 	HeartSprite3 = display.newSprite( HeartSheet, sequenceData )
-	HeartSprite3.x = 96+15
-	HeartSprite3.y = 32+5
+	HeartSprite3.x = 99
+	HeartSprite3.y = 29
 	HeartSprite3.xScale = 0.5
 	HeartSprite3.yScale = 0.5
 	HeartSprite3:play()
 	
 	HeartSprite4 = display.newSprite( HeartSheet, sequenceData )
-	HeartSprite4.x = 64+15
-	HeartSprite4.y = 32+5
+	HeartSprite4.x = 65
+	HeartSprite4.y = 29
 	HeartSprite4.xScale = 0.5
 	HeartSprite4.yScale = 0.5
 	HeartSprite4:play()
 
 	HeartSprite5 = display.newSprite( HeartSheet, sequenceData )
-	HeartSprite5.x = 32+10
-	HeartSprite5.y = 32+5
+	HeartSprite5.x = 32
+	HeartSprite5.y = 29
+	HeartSprite5.xScale = 0.5
+	HeartSprite5.yScale = 0.5
 	HeartSprite5:play()
 	
 	
@@ -1172,190 +1177,6 @@ function scene:enterScene( event )
 	
 	-----------------------------------------------------------------------------
 	
-
-end
-
-
--- Called when scene is about to move offscreen:
-function scene:exitScene( event )
-	
-	
-	-----------------------------------------------------------------------------
-	
-	--	INSERT code here (e.g. stop timers, remove listeners, unload sounds, etc.)
-	
-	-----------------------------------------------------------------------------
-	
-end
-
-
--- Called prior to the removal of scene's "view" (display group)
-function scene:destroyScene( event )
-	local group = self.view
-	
-	
-	--Runtime:removeEventListener("enterFrame", Update)
-	--Runtime:removeEventListener("touch", onTouch)
-	-----------------------------------------------------------------------------
-	
-	--	INSERT code here (e.g. remove listeners, widgets, save player.state, etc.)
-	
-	-----------------------------------------------------------------------------
-
-	
-	local group = self.view
-	
-	if map ~= nil then
-	--	map:destroy()
-		map.destroy()
-		map = nil
-	end
-	Runtime:removeEventListener( "key", onKeyEvent )
-	
-	display.remove(tap_effect)
-	tap_effect = nil
-	
-	display.remove(traject)
-	traject = nil
-	
-	Runtime:removeEventListener("enterFrame", Update)
-	Runtime:removeEventListener("touch", onTouch)
-	for i=1,4 do
-		if banner_trans[i] ~= nil then
-			transition.cancel(banner_trans[i])
-		end
-	end
-	
-	--Remove tutorial text boxes
-	display.remove(tutorial_Bg1)
-	tutorial_Bg1 = nil
-	display.remove(tutorial_Bg2)
-	tutorial_Bg2 = nil
-	display.remove(tutorial_Bg3)
-	tutorial_Bg3 = nil
-	
-	if trans_blackbox ~= nil then
-		transition.cancel(trans_blackbox)
-	end
-	
-	-- remove them
-	display.remove(HeartSprite1)
-	display.remove(HeartSprite2)
-	display.remove(HeartSprite3)
-	display.remove(HeartSprite4)
-	display.remove(HeartSprite5)
-	
-	for i=1,2 do
-		display.remove(bgBase)
-		bgBase = nil
-		display.remove(bgFront[i])
-		bgFront[i] = nil
-	end
-	for i=1,playerMaxHealth do
-	
-		if myHearts[i] ~= nil then
-			display.remove(myHearts[i])
-			myHearts[i] = nil
-		end
-		
-	end
-	
-	display.remove(blackbox)
-	blackbox = nil
-	
-	if redArrow ~= nil then
-		--display.remove(redArrow)
-		--redArrow = nil
-		
-	end
-	if handicon~= nil then
-		--display.remove(handicon)
-		--handicon = nil
-	end
-	if taphereText~= nil then
-		--display.remove(taphereText)
-		--taphereText = nil
-	end
-	
-	display.remove(bg)
-	bg = nil
-	display.remove(bg2)
-	bg2 = nil
-	reverse_Timer = 0
-	Enable.reverse = false
-	--questionMark.alpha = 0
-	display.remove(questionMark)
-	questionMark = nil
-	display.remove(pauseBtn)
-	pauseBtn = nil
-
-	display.remove(banner_bg)
-	banner_bg = nil
-	
-	display.remove(banner_text)
-	banner_text = nil
-
-	player:removeSelf()
-
-	if player ~= nil then
-		--player:removeEventListener("touch", onTouchPlayer)
-		display.remove(player)
-		player = nil
-	end
-	
-	for i=#pendulum,1,-1 do
-		pendulum[i] = nil
-	end
-	for i=#pendulumSupport,1,-1 do
-		pendulumSupport[i] = nil
-	end
-	for i=#platform,1,-1 do
-		platform[i] = nil
-	end
-	
-	-- new
-	if #enemyList > 0 then
-		enemyList[1].DestroyAll()
-	end
-	for e = #enemyList,1,-1 do
-		table.remove(enemyList, e)
-	end
-	
-	if popup ~= nil then
-		physics.removeBody(popup)
-		popup = nil
-	end
-	
-	display.remove(obstacleLayer)
-	obstacleLayer = nil
-	display.remove(collectableLayer)
-	collectableLayer = nil
-	display.remove(DeathBg)
-	DeathBg = nil
-	Enable.distortion = false
-	Enable.blur = false
-	Enable.playerBlur = false
-	
-	--End of Screenshake function
-	if groupcs ~= nil then
-		for i=groupcs.numChildren,1, -1 do
-		
-			local child = groupcs[i]
-
-				child.alpha = 0 -- blur 0.6		
-			
-				--if child.alpha == 0 then
-					 child.parent:remove( child )
-					 child = nil
-				--end
-			
-		end
-
-	end
-	--groupcs:removeSelf()
-	groupcs = nil
-	--playermb:removeSelf()
-	playermb = nil
 
 end
 
@@ -1738,8 +1559,9 @@ function Update(event)
 		bg2.x = bg2.x - mapPos.diff.x * bg2.parallaxFactor
 		--bg2.y = bg2.y - mapPos.diff.y * bg2.parallaxFactorY
 	end
+
 	--Scrolling bg layers updates
-	if storyboard.currentWorld == 1 then
+	if storyboard.currentStage == 1 then
 		for i=1,2 do
 			if bgFront ~= nil then
 
@@ -1770,14 +1592,12 @@ function Update(event)
 			end
 		end
 	end
-
 	
 	if mapPos.diff.x == 0 and mapPos.diff.y == 0 and player.state ~= States.walking then
 		player.state = States.idle
-	elseif player.state ~= States.walking and (mapPos.diff.x ~= 0 or mapPos.diff.y ~=0) then
+	elseif player.state ~= States.walking and (mapPos.diff.x ~= 0 or mapPos.diff.y ~= 0) then
 		player.state = States.moving
 	end
-	
 
 	--Screenshake function
 	if groupcs ~= nil and (Enable.distortion == true or Enable.blur == true) then
@@ -1926,8 +1746,9 @@ function Update(event)
 			transition.pause(tap_effect) -- remove tap_effect
 
 			-- if player has stopped moving, no velocity
-			if isInRange( {vx,vy} , -.5, .5 ) then
-				clamp( {vx,vy}, -.5, .5 )
+			local clampDist = 1
+			if isInRange( {vx,vy} , -clampDist, clampDist ) then
+				player:setLinearVelocity( 0, 0 )
 				player.state = States.idle
 			end
 
@@ -1938,13 +1759,15 @@ function Update(event)
 		
 	end
 
+	-- code for player jumping movement
 	if player.state == States.moving then
 
-			-- if player has stopped moving, no velocity
-			if isInRange( {vx,vy} , -1, 1 ) then
-				vx, vy = 0, 0
-				player.state = States.idle
-			end
+		-- if player has stopped moving, no velocity
+		local clampDist = 1
+		if isInRange( {vx,vy} , -clampDist, clampDist ) then
+			player:setLinearVelocity( 0, 0 )
+			player.state = States.idle
+		end
 
 	end
 
@@ -1958,7 +1781,7 @@ function Update(event)
 		end
 	end
 	
-	if map ~= nil then
+	if map ~= nil and not map.isTransitioning then
 		map.updateView()
 		mapPos.curr.x, mapPos.curr.y = map.getViewpoint()
 	end
@@ -1977,16 +1800,21 @@ function Update(event)
 		storyboard.showOverlay( "Popup", { params = { one = popup.text } } )
 	end
 
-	if touchHandler.numTouches > 0 then
+	if screen.bDebug then
+
+		-- some screen messages for debug
+		if touchHandler.numTouches > 0 then
+			screen.debugText.text = "numTouches : " .. tostring(touchHandler.numTouches)
+		else
+			screen.debugText.text = ""
+		end
+
 		screen.debugText.text = "numTouches : " .. tostring(touchHandler.numTouches)
-	else
-		screen.debugText.text = ""
+
+		screen.debugText3.text = "mapPos.curr.x : " .. tostring(mapPos.curr.x)
+		screen.debugText4.text = "mapPos.curr.y : " .. tostring(mapPos.curr.y)
+
 	end
-
-	screen.debugText.text = "numTouches : " .. tostring(touchHandler.numTouches)
-
-	screen.debugText3.text = "mapPos.curr.x : " .. tostring(mapPos.curr.x)
-	screen.debugText4.text = "mapPos.curr.y : " .. tostring(mapPos.curr.y)
 
 end 
 
@@ -2022,13 +1850,13 @@ function onTouchPlayer ( event )
 				touchHandler.beganOn == "player" and
 				touchHandler.numTouches < 2 then
 
-				btnDown = true
-				if btnDown == true and traject_created == false and tutorial.step1 ~= true then
-					traject.alpha = 1
-					traject.x = lineOrigin.x + mapPos.curr.x
-					traject.y = lineOrigin.y + mapPos.curr.y - 5
-					traject_created = true
-				end
+			btnDown = true
+			if btnDown == true and traject_created == false and tutorial.step1 ~= true then
+				traject.alpha = 1
+				traject.x = lineOrigin.x + mapPos.curr.x
+				traject.y = lineOrigin.y + mapPos.curr.y - 5
+				traject_created = true
+			end
 
 			
 		elseif event.phase == "ended" then 
@@ -2088,7 +1916,6 @@ local function onTouch(event)
 						traject.width = widthcheck
 					end
 					
-				--	traject:setReferencePoint( display.CenterLeftReferencePoint )
 					traject.alpha = 1
 					traject.x = lineOrigin.x
 					traject.y = lineOrigin.y
@@ -2105,8 +1932,8 @@ local function onTouch(event)
 						local newMapPos = { x = mapPos.before_touch.x - diff_pos.x, y = mapPos.before_touch.y - diff_pos.y }
 
 						-- make sure moving of the camera doesn't go out of bound
-						newMapPos.x = clamp( newMapPos.x, screen.width / 2, map.data.width - (screen.width / 2) )
-						newMapPos.y = clamp( newMapPos.y, screen.height / 2, map.data.height - (screen.height / 2) )
+						newMapPos.x = clamp( newMapPos.x, screen.width / 2, (map.data.width * map.xScale) - (screen.width / 2) )
+						newMapPos.y = clamp( newMapPos.y, screen.height / 2, (map.data.height * map.yScale) - (screen.height / 2) )
 
 						map.enableFocusTracking(false)
 						map.positionCamera( newMapPos.x, newMapPos.y )
@@ -2114,7 +1941,7 @@ local function onTouch(event)
 						touchHandler.isMovingMap = true
 
 						--	screen.debugText.text = "isMovingMap"
-
+--[[
 					elseif touchHandler.numTouches > 1 then -- two or more touches, zoom in/out
 
 						map.enableFocusTracking(true)
@@ -2146,7 +1973,7 @@ local function onTouch(event)
 						map.yScale = newMapScale.y ~= 0 and newMapScale.y or map.yScale
 
 						touchHandler.isZoomingMap = true
-
+]]
 					end
 
 				end
@@ -2159,15 +1986,6 @@ local function onTouch(event)
 				--local 
 				life = playerMaxHealth - storyboard.playerHealth + 1
 				player:setSequence(life * 2 - 1)
-
-				--	print(	"\ncanMove == true				", canMove,
-				--			"\nbtnDown == false				", not btnDown,
-				--			"\nholdingBtn == false			", not holdingBtn,
-				--			"\nplayer.canJump == true		", player.canJump,
-				--			"\ninAir == false				", not inAir,
-				--			"\nplayer.state == \"idle\"		", player.state == "idle",
-				--			"\ntouchHandler.isMovingMap == false	", not touchHandler.isMovingMap
-				--			)
 				
 				if holdingBtn == true and tutorial.step1 ~= true then
 
@@ -2320,33 +2138,46 @@ local function onTouch(event)
 				if not compareTable(mapPos.curr, mapPos.before_touch) then
 
 					-- initialise the step
-					if touchHandler.isMovingMap then
-						local step = 50
-						mapPos.delta.x = (mapPos.curr.x - mapPos.before_touch.x) / step
-						mapPos.delta.y = (mapPos.curr.y - mapPos.before_touch.y) / step
+					local step = 5
+					mapPos.delta.x = (mapPos.curr.x - mapPos.before_touch.x) / step
+					mapPos.delta.y = (mapPos.curr.y - mapPos.before_touch.y) / step
+
+					function moveScreenToPlayer()
+
+						if not map then return end -- fixes crash at end of level
+
+						if isInRange(mapPos.curr.x, mapPos.before_touch.x - 5, mapPos.before_touch.x + 5) and 
+							isInRange(mapPos.curr.y, mapPos.before_touch.y - 5, mapPos.before_touch.y + 5) then
+
+							mapPos.delta.x, mapPos.delta.y = 0, 0
+							mapPos.before_touch.x, mapPos.before_touch.y = 0, 0
+
+							map.enableFocusTracking(true)
+							map.setCameraFocus(player)
+
+							map.isTransitioning = false
+							Runtime:removeEventListener( "enterFrame", moveScreenToPlayer )
+
+						else
+
+							mapPos.curr.x = mapPos.curr.x - mapPos.delta.x
+							mapPos.curr.y = mapPos.curr.y - mapPos.delta.y
+							map.setViewpoint(mapPos.curr.x, mapPos.curr.y)
+
+						end
+
+						map.updateView()
+
 					end
 
-					mapPos.curr.x = mapPos.curr.x - mapPos.delta.x
-					mapPos.curr.y = mapPos.curr.y - mapPos.delta.y
-					map.setViewpoint(mapPos.curr.x, mapPos.curr.y)
-
-					print("\tmapPos.curr			: x = " .. mapPos.curr.x .. " y = " .. mapPos.curr.y)
-
-				else -- transitioning ended
-
-					print("transition end")
-
-					mapPos.delta.x, mapPos.delta.y = 0, 0
-					tmapPos.before_touch.x, tmapPos.before_touch.y = 0, 0
-
-					map.enableFocusTracking(true)
-					map.setCameraFocus(player)
+					map.isTransitioning = true
+					Runtime:addEventListener("enterFrame", moveScreenToPlayer)
 
 				end
 
 				touchHandler:reset()
 
-				if touchHandler.numTouches < 2 then`
+				if touchHandler.numTouches < 2 then
 					map.xScale, map.yScale = 1,1
 					screen.debugText2.text = ""
 				end
@@ -2428,17 +2259,17 @@ function onCollision( event )
 			
 			local function nextScene ( event )
 				
-				local numStars = gameData.myTable.levelData[storyboard.currentWorld][storyboard.currentLevel].stars
+				local numStars = gameData.levelData[storyboard.currentStage][storyboard.currentLevel].stars
 				if storyboard.playerHealth > 4 then
-					gameData.myTable.levelData[storyboard.currentWorld][storyboard.currentLevel].stars = 3
+					gameData.levelData[storyboard.currentStage][storyboard.currentLevel].stars = 3
 				elseif storyboard.playerHealth >= 3 and numStars ~= 3 then
-					gameData.myTable.levelData[storyboard.currentWorld][storyboard.currentLevel].stars = 2
+					gameData.levelData[storyboard.currentStage][storyboard.currentLevel].stars = 2
 				elseif storyboard.playerHealth >= 1 and numStars < 2 then
-					gameData.myTable.levelData[storyboard.currentWorld][storyboard.currentLevel].stars = 1
+					gameData.levelData[storyboard.currentStage][storyboard.currentLevel].stars = 1
 				end
 				
-				if storyboard.currentLevel ~= 8 and gameData.myTable.levelData[storyboard.currentWorld][storyboard.currentLevel+1].locked == true then
-					gameData.myTable.levelData[storyboard.currentWorld][storyboard.currentLevel+1].locked = false
+				if storyboard.currentLevel ~= 8 and gameData.levelData[storyboard.currentStage][storyboard.currentLevel+1].locked == true then
+					gameData.levelData[storyboard.currentStage][storyboard.currentLevel+1].locked = false
 				end
 
 				storyboard.firstEntry = true
@@ -2973,14 +2804,14 @@ function decreaseHealthEnemy(h)
 	
 		life = playerMaxHealth - storyboard.playerHealth + 1
 		
-		if storyboard.currentWorld == 1 then
+		if storyboard.currentStage == 1 then
 			for i = 1,2 do
 				bgBase:setFrame( life )
 				bgFront[i]:setFrame( life )
 			end
 		end
 		
-		if storyboard.currentWorld == 2 then
+		if storyboard.currentStage == 2 then
 			bg2:setFrame(life)
 		end
 		
@@ -3042,13 +2873,13 @@ function decreaseHealth(h)
 			DeathBg:play()		
 			pauseBtn.alpha = 1
 			local listener1 = function()
-			local options =
-			{
-				effect = "fade",
-				time = 500,
-			}
-			storyboard.gotoScene("LevelSelect",options)	
-			storyboard.firstEntry = true
+				local options =
+				{
+					effect = "fade",
+					time = 500,
+				}
+				storyboard.gotoScene("LevelSelect",options)	
+				storyboard.firstEntry = true
 			end
 			if storyboard.isPaused == false then
 				timer.performWithDelay(4500,listener1)
@@ -3061,13 +2892,13 @@ function decreaseHealth(h)
 		--myHealthbar:setFrame( life )
 		-- Here
 		--player:setFrame(life)
-		if storyboard.currentWorld == 1 then
+		if storyboard.currentStage == 1 then
 			for i = 1,2 do
 				bgBase:setFrame( life )
 				bgFront[i]:setFrame( life )
 			end
 		end
-		if storyboard.currentWorld == 2 then
+		if storyboard.currentStage == 2 then
 			bg2:setFrame(life)
 		end
 		
@@ -3101,8 +2932,8 @@ function onKeyEvent( event )
 			id = "fakeTouch",
 			name = "touch",
 			phase = "began",
-			x = 0,
-			y = 0,
+			x = 100,
+			y = 100,
 			xStart = 0, 
 			yStart = 0
 		}
@@ -3117,8 +2948,11 @@ function onKeyEvent( event )
 	end
 
 	if phase ~= "down" then return true end
+
 	if "escape" == keyName then
 		storyboard.showOverlay( "ExitScreen" )
+	elseif "back" == keyName then
+		onButtonEvent{ target = { id = "pause_btn" } }
 	elseif "tab" == keyName then
 		onCollision( { other = { IsExit = true, x = 0.0, y = 0.0 }, phase = "began" } )
 	end
@@ -3148,6 +2982,202 @@ end
 
 --add the key callback
 Runtime:addEventListener( "key", onKeyEvent )
+
+
+-- Called when scene is about to move offscreen:
+function scene:exitScene( event )
+	
+	
+	-----------------------------------------------------------------------------
+	
+	--	INSERT code here (e.g. stop timers, remove listeners, unload sounds, etc.)
+	
+	-----------------------------------------------------------------------------
+	
+end
+
+
+-- Called prior to the removal of scene's "view" (display group)
+function scene:destroyScene( event )
+	local group = self.view
+	
+	
+	--Runtime:removeEventListener("enterFrame", Update)
+	--Runtime:removeEventListener("touch", onTouch)
+	-----------------------------------------------------------------------------
+	
+	--	INSERT code here (e.g. remove listeners, widgets, save player.state, etc.)
+	
+	-----------------------------------------------------------------------------
+
+	
+	local group = self.view
+	
+	if map ~= nil then
+	--	map:destroy()
+		map.destroy()
+		map = nil
+	end
+	Runtime:removeEventListener( "key", onKeyEvent )
+	
+	display.remove(tap_effect)
+	tap_effect = nil
+	
+	display.remove(traject)
+	traject = nil
+	
+	Runtime:removeEventListener("enterFrame", moveScreenToPlayer)
+	Runtime:removeEventListener("enterFrame", Update)
+	Runtime:removeEventListener("touch", onTouch)
+
+	for i=1,4 do
+		if banner_trans[i] ~= nil then
+			transition.cancel(banner_trans[i])
+		end
+	end
+	
+	--Remove tutorial text boxes
+	display.remove(tutorial_Bg1)
+	tutorial_Bg1 = nil
+	display.remove(tutorial_Bg2)
+	tutorial_Bg2 = nil
+	display.remove(tutorial_Bg3)
+	tutorial_Bg3 = nil
+	
+	if trans_blackbox ~= nil then
+		transition.cancel(trans_blackbox)
+	end
+	
+	-- remove them
+	display.remove(HeartSprite1)
+	display.remove(HeartSprite2)
+	display.remove(HeartSprite3)
+	display.remove(HeartSprite4)
+	display.remove(HeartSprite5)
+	
+	for i=1,2 do
+		display.remove(bgBase)
+		bgBase = nil
+		display.remove(bgFront[i])
+		bgFront[i] = nil
+	end
+	for i=1,playerMaxHealth do
+	
+		if myHearts[i] ~= nil then
+			display.remove(myHearts[i])
+			myHearts[i] = nil
+		end
+		
+	end
+	
+	display.remove(blackbox)
+	blackbox = nil
+	
+	if redArrow ~= nil then
+		--display.remove(redArrow)
+		--redArrow = nil
+		
+	end
+	if handicon~= nil then
+		--display.remove(handicon)
+		--handicon = nil
+	end
+	if taphereText~= nil then
+		--display.remove(taphereText)
+		--taphereText = nil
+	end
+	
+	display.remove(bg)
+	bg = nil
+	display.remove(bg2)
+	bg2 = nil
+	reverse_Timer = 0
+	Enable.reverse = false
+	--questionMark.alpha = 0
+	display.remove(questionMark)
+	questionMark = nil
+	display.remove(pauseBtn)
+	pauseBtn = nil
+
+	display.remove(banner_bg)
+	banner_bg = nil
+	
+	display.remove(banner_text)
+	banner_text = nil
+
+	player:removeSelf()
+
+	if player ~= nil then
+		player:removeEventListener("touch", onTouchPlayer)
+		display.remove(player)
+		player = nil
+	end
+	
+	for i=#pendulum,1,-1 do
+		pendulum[i] = nil
+	end
+	for i=#pendulumSupport,1,-1 do
+		pendulumSupport[i] = nil
+	end
+	for i=#platform,1,-1 do
+		platform[i] = nil
+	end
+	
+	-- new
+	if #enemyList > 0 then
+		enemyList[1].DestroyAll()
+	end
+	for e = #enemyList,1,-1 do
+		table.remove(enemyList, e)
+	end
+	
+	if popup ~= nil then
+		physics.removeBody(popup)
+		popup = nil
+	end
+	
+	display.remove(obstacleLayer)
+	obstacleLayer = nil
+	display.remove(collectableLayer)
+	collectableLayer = nil
+	display.remove(DeathBg)
+	DeathBg = nil
+	Enable.distortion = false
+	Enable.blur = false
+	Enable.playerBlur = false
+	
+	--End of Screenshake function
+	if groupcs ~= nil then
+		for i=groupcs.numChildren,1, -1 do
+		
+			local child = groupcs[i]
+
+				child.alpha = 0 -- blur 0.6		
+			
+				--if child.alpha == 0 then
+					 child.parent:remove( child )
+					 child = nil
+				--end
+			
+		end
+
+	end
+	--groupcs:removeSelf()
+	groupcs = nil
+	--playermb:removeSelf()
+	playermb = nil
+
+	display.remove(screen.debugText)
+	display.remove(screen.debugText2)
+	display.remove(screen.debugText3)
+	display.remove(screen.debugText4)
+	display.remove(screen.debugText5)
+
+	screen = nil
+
+	touchHandler = nil
+
+end
 
 ---------------------------------------------------------------------------------
 -- END OF YOUR IMPLEMENTATION

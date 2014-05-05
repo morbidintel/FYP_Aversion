@@ -57,8 +57,8 @@ local function onButtonEvent(event)
 	elseif btn.id == "exit_btn" then
 							
 		--local function nextScene ( event )
-			--storyboard.hideOverlay()
-			--storyboard.purgeScene(GameScene)
+			--	storyboard.hideOverlay()
+			--	storyboard.purgeScene("GameScene")
 			storyboard.firstEntry = true
 			storyboard.isPaused = false
 			--HUD.PauseTimer(false)
@@ -126,7 +126,6 @@ end
 -- Called immediately after scene has moved onscreen:
 function scene:enterScene( event )
 	local screenGroup = self.view
-	print( "1: enterScene event" )
 	
 	-- remove previous scene's view
 	--storyboard.purgeScene( "scene4" )
@@ -164,7 +163,6 @@ local screenGroup = self.view
 	--display.remove(bg)
 	screenGroup:removeSelf()
 	screenGroup = nil
-	--print( "1: exitScene event" )
 	
 	-- remove touch listener for image
 	--image:removeEventListener( "touch", image )
@@ -179,8 +177,6 @@ end
 
 -- Called prior to the removal of scene's "view" (display group)
 function scene:destroyScene( event )
-	
-	print( "((destroying scene 1's view))" )
 end
 
 ---------------------------------------------------------------------------------

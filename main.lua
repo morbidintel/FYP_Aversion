@@ -5,7 +5,7 @@
 -----------------------------------------------------------------------------------------
 
 local storyboard = require "storyboard"
-storyboard.currentWorld = 1
+storyboard.currentStage = 1
 storyboard.currentLevel = 1
 storyboard.isPaused = false
 storyboard.playerHealth = 55
@@ -19,8 +19,6 @@ display.setStatusBar( display.HiddenStatusBar )
 --local lime = require("lime.lime")
 -- load GameScene.lua
 storyboard.gotoScene( "MainMenu" )
-	print(display.contentWidth)
-	print(display.contentHeight)
 -- Add any objects that should appear on all scenes below (e.g. tab bar, HUD, etc.):
 
 local bgm = audio.loadStream( "Audios/bgm.mp3" )

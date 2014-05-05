@@ -41,7 +41,9 @@ local function sliderListener( event )
     local value = event.value / 100
     audio.setVolume(value)
 
-    print( "Slider at " .. value .. "%" )
+    if event.phase == "ended" then
+    	print( "Slider at " .. value .. "%" )
+    end
 
 end
 
@@ -49,8 +51,6 @@ end
 local function onSwitchPress( event )
 	-- body
 	local switch = event.target
-	print("Switch with ID '"..switch.id.."' is on:" ..tostring(switch.isOn))
-	print( switch.isOn )
 
 	storyboard.isVibrateOn = switch.isOn
 
@@ -91,8 +91,6 @@ local function onButtonEvent(event)
 			timer.performWithDelay( 100, nextScene)
 				
 		elseif btn.id == "button3" then
-			print( "Green" )
-			print (collectgarbage("count")/1000)
 			collectgarbage( "collect" )
 			
 		return true
@@ -132,8 +130,8 @@ function scene:createScene( event )
 	slider[1] = widget.newSlider
 	{
 		id = "bgm",
-		top = screenHeight * 0.46,
-		left = screenWidth * 0.283,
+		top = screenHeight * 0.81,
+		left = screenWidth * 0.260,
 		width = screenWidth * 0.49,
 		listener = sliderListener,
 		value = audio.getVolume() * 100
@@ -152,8 +150,8 @@ function scene:createScene( event )
 	--Checkbox for vibration
 	checkboxButton = widget.newSwitch
 	{
-		top = screenHeight * 0.65,--0.74,
-		left = screenWidth * 0.49,
+		top = screenHeight * 0.505,
+		left = screenWidth * 0.48,
 		initialSwitchState = storyboard.isVibrateOn, -- Set the vibration mode to "On" at the start.
 		style = "checkbox",
 		id = "Checkbox button",
@@ -249,7 +247,6 @@ end
 -- Called immediately after scene has moved onscreen:
 function scene:enterScene( event )
 	local screenGroup = self.view
-	print( "1: enterScene event" )
 	
 	-- remove previous scene's view
 	--storyboard.purgeScene( "scene4" )
@@ -298,8 +295,6 @@ function scene:exitScene( event )
 	screenGroup:removeSelf()
 	screenGroup = nil
 	
-
-	--print( "1: exitScene event" )
 	
 	-- remove touch listener for image
 	--image:removeEventListener( "touch", image )
@@ -313,35 +308,34 @@ end
 
 function onKeyEvent( event )
 
-   local phase = event.phase
-   local keyName = event.keyName
-   --print( event.phase, event.keyName )
-   -- Print which key was pressed down/up to the log.
-    local message = "Key '" .. event.keyName .. "' was pressed " .. event.phase
-   	print( message )
+	local phase = event.phase
+	local keyName = event.keyName
 
-   if ( "back" == keyName and phase == "up" ) then
-		storyboard.showOverlay( "ExitScreen" ) 
-   end
+	print( event.phase, event.keyName )
 
-   --Volume Control in Settings Menu
-   if ( keyName == "volumeUp" and phase == "down" ) then --Key that is used/pressed to increase volume.
-      local masterVolume = audio.getVolume()
-      print( "Volume:", masterVolume )
-      if ( masterVolume < 1.0 ) then
-         masterVolume = masterVolume + 0.1 -- Increase the volume by 0.1 whenever up key is pressed.
-         audio.setVolume( masterVolume ) -- Set the new mastervolume affter increasing the volume.
-      end
+	if "back" == keyName then
+		onButtonEvent{ target = { id = "close_btn" } }
+	end
 
-   elseif ( keyName == "volumeDown" and phase == "down" ) then -- Key that is used/pressed to decrease the volume.
-      local masterVolume = audio.getVolume()
-      print( "Volume:", masterVolume )
-      if ( masterVolume > 0.0 ) then
-         masterVolume = masterVolume - 0.1 -- Decrease the volume by 0.1 whenever down key is pressed.
-         audio.setVolume( masterVolume ) -- Set the new mastervolume affter decreasing the volume.
-      end
-  end
-   return true  --SEE NOTE BELOW
+	--Volume Control in Settings Menu
+	--	if ( keyName == "volumeUp" and phase == "down" ) then --Key that is used/pressed to increase volume.
+	--		local masterVolume = audio.getVolume()
+	--		print( "Volume:", masterVolume )
+	--		if ( masterVolume < 1.0 ) then
+	--			masterVolume = masterVolume + 0.1 -- Increase the volume by 0.1 whenever up key is pressed.
+	--			audio.setVolume( masterVolume ) -- Set the new mastervolume affter increasing the volume.
+	--		end
+
+	--	elseif ( keyName == "volumeDown" and phase == "down" ) then -- Key that is used/pressed to decrease the volume.
+	--		local masterVolume = audio.getVolume()
+	--		print( "Volume:", masterVolume )
+	--		if ( masterVolume > 0.0 ) then
+	--			masterVolume = masterVolume - 0.1 -- Decrease the volume by 0.1 whenever down key is pressed.
+	--			audio.setVolume( masterVolume ) -- Set the new mastervolume affter decreasing the volume.
+	--		end
+	--	end
+
+	return true  --SEE NOTE BELOW
 end
 
 --add the key callback
@@ -350,8 +344,6 @@ Runtime:addEventListener( "key", onKeyEvent )
 
 -- Called prior to the removal of scene's "view" (display group)
 function scene:destroyScene( event )
-	
-	print( "((destroying scene 1's view))" )
 end
 
 ---------------------------------------------------------------------------------
