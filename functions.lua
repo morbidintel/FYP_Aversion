@@ -1,6 +1,6 @@
 function printTable(s, l, i) -- recursive Print (structure, limit, indent)
 
-	l = (l) or 50
+	l = (l) or 5
 	i = i or ""	-- default item limit, indent string
 
 	if (l<1) then
@@ -12,20 +12,20 @@ function printTable(s, l, i) -- recursive Print (structure, limit, indent)
 
 	if ts ~= "table" then
 		print(i, ts, s)
-		return l - 1
+		return l + 1
+	else
+		print (i .. tostring(s))		   -- print "table"
 	end
-
-	print (i .. ts)		   -- print "table"
 
 	for k,v in pairs(s) do  -- print "[KEY] VALUE"
 
 		if tostring(k) == "__index" then
 
-			print(i.."["..tostring(k).."]\t", ts, s)
+			print(i.."\t["..k.."]", ts, s)
 
 		else
 
-			l = printTable(v, l, i.."["..tostring(k).."]\t")
+			l = printTable(v, l-1, i.."["..k.."]\t")
 
 			if (l < 0) then break end
 
@@ -58,7 +58,7 @@ function clone(t, target) -- deep-copy a table
 	setmetatable(target, meta)
 
 	return target
-
+ 
 end
 
 function copy(t, target) -- shallow-copy a table
@@ -108,10 +108,12 @@ function const_table(table)
 end
 
 -- Recursively compare two tables
+-- Optionally, pass in a compare function
 -- Returns false if any of the values or values in nested tables
 -- are not matching either in name or in value
 -- t = O(n)
-function compareTable(t1, t2)
+function compareTable(t1, t2, compFunc)
+
 
 	if type(t1) ~= "table" or type(t2) ~= "table" then
 		-- both are not tables
@@ -119,7 +121,9 @@ function compareTable(t1, t2)
 		print("compareTable : invalid parameter(s)")
 		return false
 
-	elseif t1 == t2 then
+	elseif t1 ~= t2 then
+
+		compFunc = compFunc or function(t1,t2) return t1 == t2 end
 
 		-- loop through one table
 		for k,v in pairs(t1) do
@@ -128,19 +132,19 @@ function compareTable(t1, t2)
 
 			if k ~= "__index" then
 				-- metatable ignore __index
-			
+
 				if type(v) == "table" then
 					-- ok they're tables
 
-					if	type(t2[k]) ~= "table" and		-- make sure both are tables
-						v ~= t2[k] and					-- if they don't have the same address
-						not compareTable() then			-- we'll recursively check through their contents
+					if	type(t2[k]) ~= "table" or		-- make sure both are tables
+						v ~= t2[k] or					-- if they don't have the same address
+						not compareTable(v,t2[k],compFunc) then			-- we'll recursively check through their contents
 
 						return false
 
 					end
 
-				elseif not t2[k] or t2[k] ~= v then		-- they're not tables, check if they're the same
+				elseif t2[k] == nil or not compFunc(v,t2[k]) then		-- they're not tables, check if they're the same
 
 					return false						-- ok not the same, the table doesn't match
 
@@ -157,51 +161,29 @@ function compareTable(t1, t2)
 end
 
 -- Finds a value inside a table
+-- Optionally, pass in a compare function
 -- Ignores nested tables, matches table adresses instead
 -- Ignores metatables
 -- If value is found,
 --		return true, <index of value>
 -- Else if value not found
 --		return false, 0
-function findInTable(table, value)
+function findInTable(table, value, compFunc)
 
 	if table == nil and value == nil then
 		error("findInTable : invalid parameter(s)")
 	end
 
+	compFunc = compFunc or function(v1,v2) return v1 == v2 end
+
 	for i,v in ipairs(table) do
-		if v == value then
+		if compFunc(v,value) then
 			return true, i
 		end
 	end
 
 	return false, 0
 
-end
-
--- Finds a value inside a table
--- Looks through nested tables, compares values of nested tables 
--- Ignores metatables
--- If value is found,
---		return true, <index of value>
--- Else if value not found
---		return false, 0
-function searchInTable(table, value)
-
-	if table == nil and value == nil then
-		error("searchInTable : invalid parameter(s)")
-	end
-
-	for i,v in ipairs(table) do
-
-		if type(v) == "table" then
-			searchInTable(v, value)
-		elseif v == value then
-			return true, i
-		end
-	end
-
-	return false, 0
 end
 
 -- Check if value is in a range
@@ -240,7 +222,7 @@ function isInRange(value, min, max)
 
 end
 
--- Makes sure that a values stays in range
+-- Makes sure that a value stays in range
 -- If value is less than min, value will be set to min
 -- Else if value is more than man, value will be set to max
 function clamp(value, min, max)
@@ -255,10 +237,14 @@ function clamp(value, min, max)
 	-- if we have a table
 	if vType == "table" then
 
+		local table = value
+
 		-- go through all the values in the table
-		for k,v in pairs(value) do
-			clamp(v,min,max)
+		for k,v in pairs(table) do
+			table[k] = clamp(v,min,max)
 		end
+
+		return table
 
 	elseif vType == "number" and type(min) == "number" and type(max) == "number" then
 		-- make sure all the stuff we are checking are numbers
@@ -266,7 +252,7 @@ function clamp(value, min, max)
 		if value < min then
 			value = min
 		elseif value > max then
-			value = max 
+			value = max
 		end
 
 	else
@@ -278,3 +264,6 @@ function clamp(value, min, max)
 	return value
 
 end
+
+function clampMin(value, min) return clamp(value,min,value) end
+function clampMax(value, max) return clamp(value,value,max) end

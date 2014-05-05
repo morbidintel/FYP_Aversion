@@ -9,59 +9,64 @@ M.saveData = function()
     loadsave.saveTable(M.myTable, DATA_FILE);
 end
  
-M.myTable = loadsave.loadTable(DATA_FILE)  -- this load myTable everytime I open the app
+M.levelData = loadsave.loadTable(DATA_FILE)  -- this load myTable everytime I open the app
  
-local numOfWorlds = 5
+local numOfStages = 5
 local numOfLevels = 8
 
-function M.GetNumOfWorlds()
-	return numOfWorlds
+function M.GetNumOfStages()
+	return numOfStages
 end
 
 function M.GetNumOfLevels()
 	return numOfLevels
 end
 
-if (M.myTable == nil) then
+function M.GetStarsForStage(stage)
 
-	M.myTable = {}
-	M.myTable.levelData = {}
+	if not stage or stage < 1 or stage > numOfStages then
+		error("M.GetStarsForStage : invalid stage number")
+	end
 
-	for i=1,numOfWorlds do
+	local totalStars = 0
 
-		M.myTable.levelData[i] = {}
+	for i = 1, numOfLevels do
+		totalStars = totalStars + M.levelData[stage][i].stars
+	end
+
+	return totalStars
+
+end
+
+
+if (M.levelData == nil) then
+
+	M.levelData = {}
+
+	for i=1,numOfStages do
+
+		M.levelData[i] = {}
 
         for j=1,numOfLevels do
 			 
-			M.myTable.levelData[i][j] = {}
-			M.myTable.levelData[i][j].locked = true
-			M.myTable.levelData[i][j].stars = 0
+			M.levelData[i][j] = {}
+			M.levelData[i][j].locked = false
+			M.levelData[i][j].stars = 0
 		end
+
     end
 	
-	M.myTable.levelData[1][1].locked = false
+	M.levelData[1][1].locked = false
 	M.saveData() -- Saves the data	
 end
 
-for j=1,numOfLevels do
-	M.myTable.levelData[1][j].locked = false
+for stageIndex = 3, numOfStages do
+	for levelIndex = 1, numOfLevels do
+		M.levelData[stageIndex][levelIndex].locked = true
+	end
 end
 
-M.myTable.levelData[1][2].locked = false
-M.myTable.levelData[1][3].locked = false
-M.myTable.levelData[1][4].locked = false
-M.myTable.levelData[1][5].locked = false
-M.myTable.levelData[1][6].locked = false
-M.myTable.levelData[1][7].locked = false
-M.myTable.levelData[1][8].locked = false
- 
-M.myTable.levelData[5][1].locked = false
-
-for i=1,7 do
-	M.myTable.levelData[1][i].stars = 3 
-end
-
-M.myTable.levelData[1][2].stars = 2
+M.saveData()
 
 M.myTable = loadsave.loadTable(DATA_FILE) -- This loads the saved table
 

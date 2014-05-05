@@ -58,12 +58,12 @@ local function onButtonEvent(event)
 	
 		--local function resumeScene ( event )
 			storyboard.hideOverlay("LevelClear")
-			if storyboard.currentWorld == 1 and storyboard.currentLevel == 8 then
-				storyboard.currentWorld = 2
+			if storyboard.currentStage == 1 and storyboard.currentLevel == 8 then
+				storyboard.currentStage = 2
 				storyboard.currentLevel = 1
-				gameData.myTable.levelData[2][1].locked = false
+				gameData.levelData[5][1].locked = false
 				storyboard.gotoScene("LevelSelect")
-			elseif storyboard.currentWorld == 2 and storyboard.currentLevel == 8 then
+			elseif storyboard.currentStage == 2 and storyboard.currentLevel == 8 then
 				storyboard.gotoScene("Credits")
 			else
 				storyboard.currentLevel = storyboard.currentLevel + 1
@@ -93,7 +93,7 @@ function scene:createScene( event )
 	bg2.y = screenHeight / 2.5
 
 	-- score here
-	for k=1,gameData.myTable.levelData[storyboard.currentWorld][storyboard.currentLevel].stars do
+	for k=1,gameData.levelData[storyboard.currentStage][storyboard.currentLevel].stars do
 	
 		star[k] = display.newImageRect("Images/Screen/Star.png",80,80)
 		star[k].x =  screenWidth * 0.365 + (screenWidth * 0.135 * (k-1))
@@ -144,8 +144,6 @@ end
 -- Called immediately after scene has moved onscreen:
 function scene:enterScene( event )
 	local screenGroup = self.view
-	print( "1: enterScene event" )
-
 end
 
 
@@ -178,8 +176,6 @@ end
 
 -- Called prior to the removal of scene's "view" (display group)
 function scene:destroyScene( event )
-	
-	print( "((destroying scene 1's view))" )
 end
 
 ---------------------------------------------------------------------------------

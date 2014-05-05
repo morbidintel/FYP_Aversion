@@ -109,8 +109,6 @@ function scene:createScene( event )
 	-- bg.x = 240*yMultiplier ; bg.y = 160*xMultiplier
 
 
---print("End")
-
 	bgsprite = display.newImageRect( "Images/UI_Screen/BG_blue.png", screenWidth, screenHeight)
 	bgsprite2 = display.newImageRect( "Images/UI_Screen/BG_orange.png", screenWidth, screenHeight)
 	
@@ -201,7 +199,7 @@ function scene:createScene( event )
 	end
 	
 	
-	button[1].x = screenWidth * 0.22; button[1].y = screenHeight * 0.80
+	button[1].x = screenWidth * 0.19; button[1].y = screenHeight * 0.80
 	button[2].x = screenWidth * 0.45; button[2].y = screenHeight * 0.82
 	button[3].x = screenWidth * 0.70; button[3].y = screenHeight * 0.82
 	button[4].x = screenWidth * 0.92; button[4].y = screenHeight * 0.82
@@ -214,7 +212,6 @@ end
 -- Called immediately after scene has moved onscreen:
 function scene:enterScene( event )
 	local screenGroup = self.view
-	print( "1: enterScene event" )
 	
 	-- remove previous scene's view
 	storyboard.removeScene( "GameScene" )
@@ -275,7 +272,6 @@ function scene:exitScene( event )
 		button[i] = nil
 	
 	end
-	--print( "1: exitScene event" )
 	
 	-- remove touch listener for image
 	--image:removeEventListener( "touch", image )
@@ -290,7 +286,6 @@ end
 
 -- Called prior to the removal of scene's "view" (display group)
 function scene:destroyScene( event )
-	print( "((destroying scene 1's view))" )
 end
 
 
@@ -384,31 +379,16 @@ end
 
 function onKeyEvent( event )
 
-   local phase = event.phase
-   local keyName = event.keyName
-   print( event.phase, event.keyName )
+	local phase = event.phase
+	local keyName = event.keyName
 
-   if ( "back" == keyName and phase == "up" ) then
-		storyboard.showOverlay( "ExitScreen" )
-   end
---[[
-   if ( keyName == "volumeUp" and phase == "down" ) then
-      local masterVolume = audio.getVolume()
-      print( "volume:", masterVolume )
-      if ( masterVolume < 1.0 ) then
-         masterVolume = masterVolume + 0.1
-         audio.setVolume( masterVolume )
-      end
-   elseif ( keyName == "volumeDown" and phase == "down" ) then
-      local masterVolume = audio.getVolume()
-      print( "volume:", masterVolume )
-      if ( masterVolume > 0.0 ) then
-         masterVolume = masterVolume - 0.1
-         audio.setVolume( masterVolume )
-      end
-   end
-   ]]--
-   return true  --SEE NOTE BELOW
+	print( event.phase, event.keyName )
+
+	if "back" == keyName then
+		onButtonEvent{ target = { id = "close_btn" } }
+	end
+
+	return true  --SEE NOTE BELOW
 end
 
 --add the key callback

@@ -183,7 +183,6 @@ end
 -- Called immediately after scene has moved onscreen:
 function scene:enterScene( event )
 	local screenGroup = self.view
-	print( "1: enterScene event" )
 	
 	-- remove previous scene's view
 	--storyboard.purgeScene( "scene4" )
@@ -240,7 +239,6 @@ end
 function scene:destroyScene( event )
 	Runtime:removeEventListener("enterFrame", Update)
 	Runtime:removeEventListener("touch", onTouch)
-	print( "((destroying scene 1's view))" )
 end
 
 
@@ -336,9 +334,23 @@ local function onTouch(event)
 
 end
 
-
-
 Runtime:addEventListener("touch", onTouch)
+
+
+function onKeyEvent( event )
+
+	local phase = event.phase
+	local keyName = event.keyName
+
+	print( event.phase, event.keyName )
+
+	if "back" == keyName then
+		onButtonEvent{ target = { id = "close_btn" } }
+	end
+
+end
+
+Runtime:addEventListener("onKey", onKeyEvent)
 ---------------------------------------------------------------------------------
 -- END OF YOUR IMPLEMENTATION
 ---------------------------------------------------------------------------------

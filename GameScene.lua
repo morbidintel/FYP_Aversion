@@ -9,30 +9,91 @@ local scene = storyboard.newScene()
 local widget = require( "widget" )
 local loadsave = require("loadsave")
 
-local screenWidth = display.contentWidth
-local screenHeight = display.contentHeight
-local xMultiplier = display.contentWidth/480  
-local yMultiplier = display.contentHeight/320
+system.activate("multitouch")
+
+require("physics"); physics.start()
+
 local gameData = require("GameData")
-local b_state_changed = false
-local b_state_changed_b = false
-local state = 
+
+require("functions")
+
+local touchHandler = require("TouchHandler")
+
+local screen = const_table
 {
-	STATE = "Idle",
-	IDLE = "Idle",
-	WALKING = "Walking",
-	JUMPING = "Jumping",
-	MOVING = "Moving", 
+	width  = display.contentWidth,
+	height = display.contentHeight,
+	originalWidth = 480,
+	originalHeight = 360,
+
+	bDebug = true,
+
+	debugText = display.newText
+	{ 
+		text = "",
+		x = display.contentWidth / 2,
+		y = 20,
+		fontSize = 20
+	},
+
+	debugText2 = display.newText
+	{ 
+		text = "",
+		x = display.contentWidth / 2,
+		y = 40,
+		fontSize = 20
+	},
+
+	debugText3 = display.newText
+	{ 
+		text = "",
+		x = display.contentWidth / 2,
+		y = 60,
+		fontSize = 20,
+		width = display.contentWidth,
+		align = "left"
+	},
+
+	debugText4 = display.newText
+	{ 
+		text = "",
+		x = display.contentWidth / 2,
+		y = 80,
+		fontSize = 20,
+		width = display.contentWidth,
+		align = "left"
+	}
 }
-local DIRECTION = 0
-local DIRECTION_LEFT = -1
-local DIRECTION_RIGHT = 1
-local DIRECTION_UP = 2
-local DIRECTION_DOWN = -2
-local FREE_FALL = false
-require("physics")
-physics.start()
-local player, map, visual, layer
+
+local States = const_table
+{
+	idle = "idle",
+	walking = "walking",
+	jumping = "jumping",
+	moving = "moving",
+}
+
+local player = 
+{
+}
+
+local Directions = const_table
+{
+	up		= 2,
+	down	= -2,
+	left	= -1,
+	right	= 1
+}
+
+local Enable = 
+{
+	playerBlur = true,
+	blur = false,
+	distortion = false,
+	reverse = false
+}
+
+local map
 local btnDown = false
 local btnDownTimer = 0
 local holdingBtn = false
@@ -41,11 +102,14 @@ local mapPos =
 {
 	curr = { x = 0, y = 0 },
 	prev = { x = 0, y = 0 },
-	diff = { x = 0, y = 0 }
+	diff = { x = 0, y = 0 },
+	before_touch = { x = 0, y = 0 },
+	delta = { x = 0, y = 0 },
+	isTransitioning = false,
 }
 
 local groupmb = display.newGroup()
-local inAir = true
+local inAir = false
 local onIce = false
 local groupcs 
 local touchJumpX, touchJumpY
@@ -55,12 +119,6 @@ local obstacleLayer
 
 local touchDistFromPlayer = { x = 0, y = 0 }
 local playerPrevPos = { x = 0, y = 0 }
-
-local ENABLE_PLAYERBLUR = true
-local ENABLE_BLUR = false
-local ENABLE_DISTORTION = false
-local ENABLE_REVERSE = false
-local ENABLE_NEG = false
 
 local distortion_Timer = 0
 local sfx_Timer = 0
@@ -110,7 +168,7 @@ local traject_rotation
 local traject_created = false
 local prevAngle 
 
-local screenSizeHalf = { x = screenWidth / 2, y = screenHeight / 2 }
+local screenSizeHalf = { x = screen.width / 2, y = screen.height / 2 }
 local lineOrigin = { x = 0, y = 0 }
 
 local tap_effect
@@ -123,9 +181,9 @@ local taphereText
 local canMove = true
 local tutorial = 
 {
-	step1 = {},
-	step2 = {},
-	step3 = {}
+	step1,
+	step2,
+	step3
 }
 
 local redArrowUp 
@@ -145,8 +203,6 @@ local b_Idle = true
 
 local b_pop = false
 
-
-
 ---------------------------------------------------------------------------------
 -- 
 --	NOTE:
@@ -160,6 +216,8 @@ local b_pop = false
 -- BEGINNING OF YOUR IMPLEMENTATION
 ---------------------------------------------------------------------------------
 
+
+
 local function onButtonEvent(event)
 	
 	local btn = event.target
@@ -169,7 +227,6 @@ local function onButtonEvent(event)
 		if holdingBtn == true then
 			traject.width = 5
 			traject.alpha = 0
-		--	traject:setReferencePoint( display.TopLeftReferencePoint )
 			traject.x = player:localToContent( 0, 0 ).x
 			traject_created = false
 		end
@@ -183,6 +240,7 @@ local function onButtonEvent(event)
 		else
 			physics:start()
 			storyboard.isPaused = false
+			storyboard.hideOverlay( "PauseScreen" )
 		end
 		
 	end
@@ -195,9 +253,8 @@ function scene:createScene( event )
 
 	local group = self.view
 	collectgarbage( "collect" )
-	--ENABLE_DISTORTION = true
-	ENABLE_PLAYERBLUR = true
-	state.STATE = state.IDLE
+	--Enable.distortion = true
+	Enable.playerBlur = true
 	pushingCrate = false
 	
 	traject = display.newRect(0,0,5,2)
@@ -210,9 +267,9 @@ function scene:createScene( event )
 	
 	Runtime:addEventListener("enterFrame", Update)
 	
-	mapfilename = "Levels/Level_"..storyboard.currentWorld.."_"..storyboard.currentLevel..".json"
---	mapfilename = "Levels/Level_"..storyboard.currentWorld.."_"..storyboard.currentLevel..".tmx" -- Lime
-	print("current world : "..storyboard.currentWorld.." current level : "..storyboard.currentLevel)
+	mapfilename = "Levels/Level_"..storyboard.currentStage.."_"..storyboard.currentLevel..".json"
+--	mapfilename = "Levels/Level_"..storyboard.currentStage.."_"..storyboard.currentLevel..".tmx" -- Lime
+	print("current world : "..storyboard.currentStage.." current level : "..storyboard.currentLevel)
 	print("Map filename : " .. mapfilename)
 
 
@@ -223,31 +280,31 @@ function scene:createScene( event )
 	local imgOptions =
 	{
 		-- FRAME 1:
-		width = screenWidth,
-		height = screenHeight,
+		width = screen.width,
+		height = screen.height,
 		numFrames = 5,
-		sheetContentWidth = screenWidth * 5,
-		sheetContentHeight = screenHeight
+		sheetContentWidth = screen.width * 5,
+		sheetContentHeight = screen.height
 		
 	}
 	local imgOptions2 =
 	{
 		-- FRAME 1:
-		width = screenWidth,
-		height = screenHeight,
+		width = screen.width,
+		height = screen.height,
 		numFrames = 6,
-		sheetContentWidth = screenWidth * 2,
-		sheetContentHeight = screenHeight * 3
+		sheetContentWidth = screen.width * 2,
+		sheetContentHeight = screen.height * 3
 		
 	}
 	local imgOptions3 =
 	{
 		-- FRAME 1:
-		width = screenWidth*5,
-		height = screenHeight,
+		width = screen.width*5,
+		height = screen.height,
 		numFrames = 5,
-		sheetContentWidth = screenWidth * 5,
-		sheetContentHeight = screenHeight * 5
+		sheetContentWidth = screen.width * 5,
+		sheetContentHeight = screen.height * 5
 		
 	}
 	local sequenceData =
@@ -265,20 +322,20 @@ function scene:createScene( event )
 	--1 this change the background according to the player's health
 	currentFrame = playerMaxHealth - storyboard.playerHealth + 1
 	
-	if storyboard.currentWorld == 1 then
+	if storyboard.currentStage == 1 then
 		--local myImgSheet = graphics.newImageSheet("Images/UI Screen/scrollable bg layers/Combined-BG-Sprite.png",imgOptions )
 		local myImgSheet = graphics.newImageSheet("Images/UI_Screen/scrollable_bg_layers/Aversion-bg-base-final-sprite.png",imgOptions )
 		local myImgSheet2 = graphics.newImageSheet("Images/UI_Screen/scrollable_bg_layers/Aversion-bg-front-final-sprite2.png",imgOptions2 )
 		
 		bgBase = display.newSprite(group,myImgSheet,sequenceData )
-		bgBase.x = screenWidth/2
-		bgBase.y = screenHeight/2
+		bgBase.x = screen.width/2
+		bgBase.y = screen.height/2
 		bgBase:setFrame(currentFrame)
 		
 		for i = 1,2 do
 			bgFront[i] = display.newSprite(group,myImgSheet2,sequenceData)
-			bgFront[i].x = screenWidth/2
-			bgFront[i].y = screenHeight/2
+			bgFront[i].x = screen.width/2
+			bgFront[i].y = screen.height/2
 			bgFront[i].parallaxFactor = 1.0
 			bgFront[i]:setFrame(currentFrame)
 		end
@@ -286,14 +343,14 @@ function scene:createScene( event )
 		myImgSheet = nil
 		myImgSheet2 = nil
 
-		bgFront[2].x = screenWidth + screenWidth * 0.5
+		bgFront[2].x = screen.width + screen.width * 0.5
 	end
 	
-	if storyboard.currentWorld >= 2 then
+	if storyboard.currentStage >= 2 then
 
 		local myImgSheet6_filename
 
-		if storyboard.currentWorld == 5 then
+		if storyboard.currentStage == 5 then
 			myImgSheet6_filename = "Images/UI_Screen/scrollable_bg_layers/BG_Sprite_5.png"
 		else
 			myImgSheet6_filename = "Images/UI_Screen/scrollable_bg_layers/Level2/BG_Sprite.png"
@@ -302,8 +359,8 @@ function scene:createScene( event )
 		local myImgSheet6 = graphics.newImageSheet(myImgSheet6_filename, imgOptions3 )
 
 		bg2 = display.newSprite(group,myImgSheet6,sequenceData )
-		bg2.x = screenWidth*0.5
-		bg2.y = screenHeight*0.5
+		bg2.x = screen.width*0.5
+		bg2.y = screen.height*0.5
 		bg2:setFrame(currentFrame)
 		bg2.parallaxFactor = 0.5
 	end
@@ -387,15 +444,15 @@ function scene:createScene( event )
 	-- player
 	local onPlayerSpawnObject = function(object)
 
-		layer = map.layer["Player"]
+		local layer = map.layer["Player"]
 	
 		local charOptions =
 		{
-			width = 36,
-			height = 36,
+			width = 32,
+			height = 32,
 			numFrames = 50,
-			sheetContentWidth = 1800,
-			sheetContentHeight = 36
+			sheetContentWidth = 1600,
+			sheetContentHeight = 32
 		}
 
 		local sequenceData =
@@ -421,13 +478,25 @@ function scene:createScene( event )
 		myCharSheet = graphics.newImageSheet("Images/Characters/Main_Char/PlayerSprite.png", charOptions )
 
 		player = display.newSprite(layer,myCharSheet,sequenceData)
+		player:setSequence(currentFrame * 2 - 1)
 
 		player.id = "Player"
 		player.x, player.y = object.x, object.y
 		player.originalX, player.originalY = player.x, player.y
 		player.invul = false
 		player.playerHealth = storyboard.playerHealth
-		player:setSequence(currentFrame * 2 - 1)
+		player.direction = 0
+		player.state = States.idle
+		player.canJump = true
+
+		physics.addBody(player, { density = 2.0, friction = 0.9, bounce = 0.2, radius = 14 })
+		player:addEventListener("collision", onCollision)
+
+		-- physics variables
+		player.isFixedRotation = true
+		player.isSleepingAllowed = false
+		player.isBullet = true
+		player.gravityScale = 2.0
 
 	end
 	AddInitFunction("PlayerSpawn", onPlayerSpawnObject)
@@ -481,7 +550,7 @@ function scene:createScene( event )
 
 		local mySpinBladeSheet
 
-		if storyboard.currentWorld == 1 then
+		if storyboard.currentStage == 1 then
 			mySpinBladeSheet = graphics.newImageSheet( "Images/Aversion-spinning-blade-animation-sprite.png",spinBladeOptions )
 		else
 			mySpinBladeSheet = graphics.newImageSheet( "Images/Spinning-blade-animation-sprite2.png",spinBladeOptions )
@@ -531,7 +600,7 @@ function scene:createScene( event )
 			--{ name = "3", frames={ 11,12,13,14,5 }, time = 500 },
 			--{ name = "4", frames={ 16,17,18,19,20 }, time = 500 },
 			--{ name = "5", frames={ 21,22,23,24,25 }, time = 500 }
-			-- ?????? - George
+			-- was meant for Images/IceSprite_.png - George
 		}
 
 		-- the sprite for the pendulum
@@ -543,13 +612,13 @@ function scene:createScene( event )
 		pSprite.radius = ( tonumber(object.props.radius) * 2.8 )	
 	
 		if object.direction == 2 then
-			pSprite.direction = DIRECTION_RIGHT
+			pSprite.direction = Directions.right
 			pSprite.switchingSide = false
 			pSprite.swingingLeft = false
 			pSprite.swingingRight = true
 			pSprite.degStart = 160
 		else
-			pSprite.direction = DIRECTION_LEFT
+			pSprite.direction = Directions.left
 			pSprite.switchingSide = false
 			pSprite.swingingLeft = true
 			pSprite.swingingRight = false
@@ -576,10 +645,10 @@ function scene:createScene( event )
 
 		if object.direction == 2 then
 			ropeImage.rotation = 250
-			ropeImage.direction = DIRECTION_RIGHT
+			ropeImage.direction = Directions.right
 		else
 			ropeImage.rotation = 110
-			ropeImage.direction = DIRECTION_LEFT
+			ropeImage.direction = Directions.left
 		end
 
 		ropeImage:toBack()
@@ -761,7 +830,7 @@ function scene:createScene( event )
 
 	local onEndPointSpawnObject = function(object)
 		
-		layer = map.layer["Object Layer 1"]
+		local layer = map.layer["Object Layer 1"]
 		
 		local EndPointOptions =
 		{
@@ -780,8 +849,8 @@ function scene:createScene( event )
 
 		local sprite
 
-		if storyboard.currentWorld == 1 and storyboard.currentLevel == 8 
-		or storyboard.currentWorld == 2 and storyboard.currentLevel == 8 then
+		if storyboard.currentStage == 1 and storyboard.currentLevel == 8 
+		or storyboard.currentStage == 2 and storyboard.currentLevel == 8 then
 			sprite = display.newSprite( myEndPointSheet, sequenceData )
 		else
 			sprite = display.newSprite( layer, myEndPointSheet, sequenceData )
@@ -808,7 +877,7 @@ function scene:createScene( event )
 		popup.x = object.x
 		popup.y = object.y - 32
 		popup.IsPopup = true
-		if storyboard.currentWorld == 1 then
+		if storyboard.currentStage == 1 then
 			if storyboard.currentLevel == 2 then
 				popup.text = "cannabis"
 			elseif storyboard.currentLevel == 3 then
@@ -826,36 +895,34 @@ function scene:createScene( event )
 	AddInitFunction("PopupSpawn", onPopupSpawnObject)
 	
 	--Code for custom tutorial for first level
-	if storyboard.currentLevel == 1 and  storyboard.currentWorld == 1 then
+	if storyboard.currentLevel == 1 and  storyboard.currentStage == 1 then
 		isTutorial = true
 		tutorial.step1 = true
 		tutorial.step2 = false
 
 		local onArrowSpawnObject = function(object)
 			
-			layer = map.layer["Object Layer 1"]
+			local layer = map.layer["Object Layer 1"]
 			
 			if tutorial.step1 == true then
 				
 				tutorial_Bg1 = display.newImageRect("Images/Visual_Feedback/Tutorial/Move.png",192,64)
-				tutorial_Bg1.x = screenWidth*0.75
-				tutorial_Bg1.y = screenHeight*0.65
+				tutorial_Bg1.x = screen.width*0.75
+				tutorial_Bg1.y = screen.height*0.65
 				tutorial_Bg1.alpha = 0.9
 				
 			end
-		--	redArrow = display.newImageRect(layer.group,"Images/Visual_Feedback/Arrow.png",48,48)
+
 			redArrow = display.newImageRect(layer,"Images/Visual_Feedback/Arrow.png",48,48)
 			redArrow.x = object.x
 			redArrow.y = object.y
 			redArrowOriginalY = object.y
 			redArrow.IsArrow = true
 			
-		--	taphereText = display.newImageRect(layer.group,"Images/Visual_Feedback/Tap_Here.png",100,45)
 			taphereText = display.newImageRect(layer,"Images/Visual_Feedback/Tap_Here.png",100,45)
 			taphereText.x = object.x
 			taphereText.y = object.y - 60
 			
-		--	handicon = display.newImageRect(layer.group,"Images/Visual_Feedback/Hand_Icon.png",64,64)
 			handicon = display.newImageRect(layer,"Images/Visual_Feedback/Hand_Icon.png",64,64)
 			handicon.x = object.x + 25
 			handicon.y = object.y + 32
@@ -865,16 +932,12 @@ function scene:createScene( event )
 			handicon.activated = false
 			handicon.alpha = 0
 			handicon.isPlaying = false
-			
-			
-			--transition.to(handicon,{x=screenWidth * 0.58,y=handicon.y-150,time=1600})
 
 			physics.addBody(redArrow,{isSensor = true,radius = 24})
 			redArrow.isFixedRotation = true
 			redArrow.bodyType = "static"
 
 		end
-	--	map:addObjectListener("ArrowSpawn", onArrowSpawnObject)	
 		AddInitFunction("ArrowSpawn", onArrowSpawnObject)
 	end
 	
@@ -883,31 +946,21 @@ function scene:createScene( event )
 --	local physical = lime.buildPhysical(map)
 
 	RunAllInitFunctions()
-	
-	if not player then error("player nil") end
-	player.bodyType = "static"
-	physics.addBody(player, { density = 2.0, friction = 0.9, bounce = 0.2, radius = 14 })
-	player.isFixedRotation = true
-	player.isSleepingAllowed = false
-	player.isBullet = true
-	player.gravityScale = 2.0
-	player:addEventListener("collision", onCollision)
---	map:setFocus(player) -- setting focus on player, for Lime
 
 --	Setting focus on player, for Dusk
 	map.enableFocusTracking(true)
-	map.setCameraFocus(player) 
+	map.setCameraFocus(player)
 	map.setCameraBounds( 
-		{	xMin = screenWidth / 2, xMax = map.data.width - (screenWidth / 2), 
-			yMin = screenHeight / 2, yMax = map.data.height - (screenHeight / 2) } )
+		{	xMin = screen.width / 2, xMax = map.data.width - (screen.width / 2), 
+			yMin = screen.height / 2, yMax = map.data.height - (screen.height / 2) } )
 --
 
-	player:addEventListener("touch", onTouchJump)
+	player:addEventListener("touch", onTouchPlayer)
 	
 	-----------------------------------------------------------------------------
 	
 	--	CREATE display objects and add them to 'group' here.
-	--	Example use-case: Restore 'group' from previously saved state.STATE.
+	--	Example use-case: Restore 'group' from previously saved player.state.
 	
 	-----------------------------------------------------------------------------
 	
@@ -932,11 +985,11 @@ function scene:createScene( event )
 		width = 64,
 		height = 64
 	}
-	pauseBtn.x = screenWidth * 0.92
-	pauseBtn.y = screenHeight * 0.12
+	pauseBtn.x = screen.width * 0.92
+	pauseBtn.y = screen.height * 0.12
 	
 	
-	blackbox = display.newRect(0,0,screenWidth,screenHeight)
+	blackbox = display.newRect(0,0,screen.width,screen.height)
 	blackbox:setFillColor(0, 0, 0)
 	blackbox.anchorX, blackbox.anchorY = 0, 0
 	--object:toBack()
@@ -959,47 +1012,49 @@ function scene:createScene( event )
 	}
 	
 	HeartSprite1 = display.newSprite( HeartSheet, sequenceData )
-	HeartSprite1.x = 160+15
-	HeartSprite1.y = 32+5
+	HeartSprite1.x = 163
+	HeartSprite1.y = 29
 	HeartSprite1.xScale = 0.5
 	HeartSprite1.yScale = 0.5
 	HeartSprite1:play()
 	
 	HeartSprite2 = display.newSprite( HeartSheet, sequenceData )
-	HeartSprite2.x = 128+15
-	HeartSprite2.y = 32+5
+	HeartSprite2.x = 131
+	HeartSprite2.y = 29
 	HeartSprite2.xScale = 0.5
 	HeartSprite2.yScale = 0.5
 	HeartSprite2:play()
 	
 	HeartSprite3 = display.newSprite( HeartSheet, sequenceData )
-	HeartSprite3.x = 96+15
-	HeartSprite3.y = 32+5
+	HeartSprite3.x = 99
+	HeartSprite3.y = 29
 	HeartSprite3.xScale = 0.5
 	HeartSprite3.yScale = 0.5
 	HeartSprite3:play()
 	
 	HeartSprite4 = display.newSprite( HeartSheet, sequenceData )
-	HeartSprite4.x = 64+15
-	HeartSprite4.y = 32+5
+	HeartSprite4.x = 65
+	HeartSprite4.y = 29
 	HeartSprite4.xScale = 0.5
 	HeartSprite4.yScale = 0.5
 	HeartSprite4:play()
 
 	HeartSprite5 = display.newSprite( HeartSheet, sequenceData )
-	HeartSprite5.x = 32+10
-	HeartSprite5.y = 32+5
+	HeartSprite5.x = 32
+	HeartSprite5.y = 29
+	HeartSprite5.xScale = 0.5
+	HeartSprite5.yScale = 0.5
 	HeartSprite5:play()
 	
 	
 	local DeathBgOptions =
 	{
 		-- FRAME 1:
-		width = screenWidth,
-		height = screenHeight,
+		width = screen.width,
+		height = screen.height,
 		numFrames = 9,
-		sheetContentWidth = screenWidth * 3,
-		sheetContentHeight = screenHeight * 3
+		sheetContentWidth = screen.width * 3,
+		sheetContentHeight = screen.height * 3
 	}
 	local myDeathBgSheet = graphics.newImageSheet("Images/UI_Screen/char_die_screen_only/Aversion-character-die-screen-sprite.png",DeathBgOptions )
 	local sequenceDataDBG =
@@ -1009,8 +1064,8 @@ function scene:createScene( event )
 							  ,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9 }, time = 3600, loopCount=1}
 	}
 	DeathBg = display.newSprite( myDeathBgSheet, sequenceDataDBG )
-	DeathBg.x = screenWidth * 0.5
-	DeathBg.y = screenHeight * 0.5
+	DeathBg.x = screen.width * 0.5
+	DeathBg.y = screen.height * 0.5
 	DeathBg:setSequence("1")
 	DeathBg.alpha = 0
 	
@@ -1020,12 +1075,12 @@ function scene:createScene( event )
 	
 	local listener4 = function()
 		
-		banner_trans[1] = transition.to(banner_bg,{x=screenWidth*1.5,time=500})
+		banner_trans[1] = transition.to(banner_bg,{x=screen.width*1.5,time=500})
 	
 	end
 	local listener3 = function()
 		
-		banner_trans[2] = transition.to(banner_text,{x=screenWidth*1.5,time=500,onComplete = listener4})
+		banner_trans[2] = transition.to(banner_text,{x=screen.width*1.5,time=500,onComplete = listener4})
 	
 	end
 	local listener2 = function()
@@ -1035,15 +1090,15 @@ function scene:createScene( event )
 	end
 	local listener1 = function()
 		
-		banner_trans[4] = transition.to(banner_text,{x=screenWidth*0.5,time=500,onComplete = listener2})
+		banner_trans[4] = transition.to(banner_text,{x=screen.width*0.5,time=500,onComplete = listener2})
 	
 	end
 	
-	banner_bg = display.newImageRect("Images/Level_Banner/Banner.png",screenWidth,screenHeight)
-	banner_bg.x = screenWidth * -0.5
-	banner_bg.y = screenHeight * 0.5
+	banner_bg = display.newImageRect("Images/Level_Banner/Banner.png",screen.width,screen.height)
+	banner_bg.x = screen.width * -0.5
+	banner_bg.y = screen.height * 0.5
 	
-	transition.to(banner_bg,{x=screenWidth*0.5,time=500,onComplete = listener1})
+	transition.to(banner_bg,{x=screen.width*0.5,time=500,onComplete = listener1})
 	
 	
 	local imgOptions2 =
@@ -1062,8 +1117,8 @@ function scene:createScene( event )
 	}
 	
 	banner_text = display.newSprite( myImgSheet2, sequenceData2 )
-	banner_text.x = screenWidth * -0.5
-	banner_text.y = screenHeight * 0.3
+	banner_text.x = screen.width * -0.5
+	banner_text.y = screen.height * 0.3
 	banner_text:setFrame(storyboard.currentLevel)
 	
 	myImgSheet2 = nil
@@ -1092,6 +1147,7 @@ function scene:createScene( event )
 	tap_effect.alpha = 0
 
 	IdleStartTime = system.getTimer()/1000
+
 end
 
 
@@ -1125,192 +1181,6 @@ function scene:enterScene( event )
 end
 
 
--- Called when scene is about to move offscreen:
-function scene:exitScene( event )
-	
-	
-	-----------------------------------------------------------------------------
-	
-	--	INSERT code here (e.g. stop timers, remove listeners, unload sounds, etc.)
-	
-	-----------------------------------------------------------------------------
-	
-end
-
-
--- Called prior to the removal of scene's "view" (display group)
-function scene:destroyScene( event )
-	local group = self.view
-	
-	
-	--Runtime:removeEventListener("enterFrame", Update)
-	--Runtime:removeEventListener("touch", onTouch)
-	-----------------------------------------------------------------------------
-	
-	--	INSERT code here (e.g. remove listeners, widgets, save state.STATE, etc.)
-	
-	-----------------------------------------------------------------------------
-
-	
-	local group = self.view
-	
-	if map ~= nil then
-	--	map:destroy()
-		map.destroy()
-		map = nil
-	end
-	Runtime:removeEventListener( "key", onKeyEvent )
-	
-	display.remove(tap_effect)
-	tap_effect = nil
-	
-	display.remove(traject)
-	traject = nil
-	
-	Runtime:removeEventListener("enterFrame", Update)
-	Runtime:removeEventListener("touch", onTouch)
-	for i=1,4 do
-		if banner_trans[i] ~= nil then
-			transition.cancel(banner_trans[i])
-		end
-	end
-	
-	--Remove tutorial text boxes
-	display.remove(tutorial_Bg1)
-	tutorial_Bg1 = nil
-	display.remove(tutorial_Bg2)
-	tutorial_Bg2 = nil
-	display.remove(tutorial_Bg3)
-	tutorial_Bg3 = nil
-	
-	if trans_blackbox ~= nil then
-		transition.cancel(trans_blackbox)
-	end
-	
-	-- remove them
-	display.remove(HeartSprite1)
-	display.remove(HeartSprite2)
-	display.remove(HeartSprite3)
-	display.remove(HeartSprite4)
-	display.remove(HeartSprite5)
-	
-	for i=1,2 do
-		display.remove(bgBase)
-		bgBase = nil
-		display.remove(bgFront[i])
-		bgFront[i] = nil
-	end
-	for i=1,playerMaxHealth do
-	
-		if myHearts[i] ~= nil then
-			display.remove(myHearts[i])
-			myHearts[i] = nil
-		end
-		
-	end
-	
-	display.remove(blackbox)
-	blackbox = nil
-	
-	if redArrow ~= nil then
-		--display.remove(redArrow)
-		--redArrow = nil
-		
-	end
-	if handicon~= nil then
-		--display.remove(handicon)
-		--handicon = nil
-	end
-	if taphereText~= nil then
-		--display.remove(taphereText)
-		--taphereText = nil
-	end
-	
-	display.remove(bg)
-	bg = nil
-	display.remove(bg2)
-	bg2 = nil
-	reverse_Timer = 0
-	ENABLE_REVERSE = false
-	--questionMark.alpha = 0
-	display.remove(questionMark)
-	questionMark = nil
-	display.remove(pauseBtn)
-	pauseBtn = nil
-
-	display.remove(banner_bg)
-	banner_bg = nil
-	
-	display.remove(banner_text)
-	banner_text = nil
-	--visual:removeSelf()
-	--visual = nil
-	player:removeSelf()
-	if player ~= nil then
-		--player:removeEventListener("touch", onTouchJump)
-		display.remove(player)
-		player = nil
-	end
-	
-	for i=#pendulum,1,-1 do
-		pendulum[i] = nil
-	end
-	for i=#pendulumSupport,1,-1 do
-		pendulumSupport[i] = nil
-	end
-	for i=#platform,1,-1 do
-		platform[i] = nil
-	end
-	
-	-- new
-	if #enemyList > 0 then
-		enemyList[1].DestroyAll()
-	end
-	for e = #enemyList,1,-1 do
-		table.remove(enemyList, e)
-	end
-	
-	if popup ~= nil then
-		physics.removeBody(popup)
-		popup = nil
-	end
-	
-	display.remove(layer)
-	layer = nil
-	display.remove(obstacleLayer)
-	obstacleLayer = nil
-	display.remove(collectableLayer)
-	collectableLayer = nil
-	display.remove(DeathBg)
-	DeathBg = nil
-	ENABLE_DISTORTION = false
-	ENABLE_BLUR = false
-	ENABLE_PLAYERBLUR = false
-	
-	--End of Screenshake function
-	if groupcs ~= nil then
-		for i=groupcs.numChildren,1, -1 do
-		
-			local child = groupcs[i]
-
-				child.alpha = 0 -- blur 0.6		
-			
-				--if child.alpha == 0 then
-					 child.parent:remove( child )
-					 child = nil
-				--end
-			
-		end
-
-	end
-	--groupcs:removeSelf()
-	groupcs = nil
-	--playermb:removeSelf()
-	playermb = nil
-
-end
-
-
 local ShavedIceOptions = 
  {
 	width = 32,
@@ -1330,7 +1200,7 @@ local shits = {}
 
 local function UpdatePendulum(object, degrees, minAngle, maxAngle)
 
-	if object.direction == DIRECTION_LEFT and object.degStart + degrees <= maxAngle then
+	if object.direction == Directions.left and object.degStart + degrees <= maxAngle then
 		local rads = (object.degStart + degrees) * (math.pi / 180.0)
 		object.degStart = object.degStart + degrees
 		
@@ -1345,7 +1215,7 @@ local function UpdatePendulum(object, degrees, minAngle, maxAngle)
 		end
 		object.xScale = 1
 
-	elseif object.direction == DIRECTION_RIGHT and object.degStart - degrees >= minAngle then
+	elseif object.direction == Directions.right and object.degStart - degrees >= minAngle then
 		local rads = (object.degStart - degrees) * (math.pi / 180.0)
 		object.degStart = object.degStart - degrees
 		
@@ -1367,7 +1237,7 @@ local function UpdatePendulum(object, degrees, minAngle, maxAngle)
 		local sprite = display.newSprite( obstacleLayer.group, myShavedIceSheet, sequenceData )
 		sprite.x = object.x
 		sprite.y = object.y + 40
-		if object.direction == DIRECTION_LEFT then
+		if object.direction == Directions.left then
 			sprite.rotation = -45
 		else
 			sprite.rotation = 45
@@ -1407,8 +1277,8 @@ function UpdateObstacles()
 					child.direction = -child.direction
 	
 				end
-				if child2.direction == DIRECTION_LEFT then--and child.switchingSide == true then
-					--child.direction = DIRECTION_RIGHT
+				if child2.direction == Directions.left then--and child.switchingSide == true then
+					--child.direction = Directions.right
 					if child2.swingingLeft == true then
 						child.rotation = child.rotation + 1.5	-- pendulum support's speed
 					end
@@ -1418,8 +1288,8 @@ function UpdateObstacles()
 					
 					--transition.to(child,{rotation = 250, time = 1800,transition = easing.inOutExpo,onComplete = listener1})
 					--transition.to(child,{rotation = 250, time = 2000,transition = easing.linear,onComplete = listener1})
-				elseif child2.direction == DIRECTION_RIGHT then--and child.switchingSide == true then
-					--child.direction = DIRECTION_LEFT
+				elseif child2.direction == Directions.right then--and child.switchingSide == true then
+					--child.direction = Directions.left
 					if child2.swingingRight == true then
 						child.rotation = child.rotation - 1.5	-- pendulum support's speed
 					end
@@ -1441,59 +1311,59 @@ function UpdateObstacles()
 					child.direction = -child.direction
 					
 				end
-				if child.direction == DIRECTION_LEFT then--and child.switchingSide == true then
+				if child.direction == Directions.left then--and child.switchingSide == true then
 
-					--child.direction = DIRECTION_RIGHT
+					--child.direction = Directions.right
 					child:setLinearVelocity( -child.speed, 0 )
 					--child.switchingSide = false
 					--child.rotation = child.rotation + 2
 					--transition.to(child,{rotation = 250, time = 1800,transition = easing.inOutExpo,onComplete = listener1})
-					if child.startingDir == DIRECTION_LEFT and child.x < child.startingX - child.distance then
+					if child.startingDir == Directions.left and child.x < child.startingX - child.distance then
 						listener1()
-					elseif child.startingDir == DIRECTION_RIGHT and child.x <= child.startingX  then
+					elseif child.startingDir == Directions.right and child.x <= child.startingX  then
 						--child.x = child.startingX
 						listener1()
 					end
 				end
-				if child.direction == DIRECTION_RIGHT then--and child.switchingSide == true then
+				if child.direction == Directions.right then--and child.switchingSide == true then
 
-					--child.direction = DIRECTION_LEFT
+					--child.direction = Directions.left
 					--child.rotation = child.rotation - 2
 					child:setLinearVelocity( child.speed, 0 )
 					--child:translate(2,0)
 					--child.switchingSide = false
-					if child.startingDir == DIRECTION_RIGHT and child.x > child.startingX + child.distance then
+					if child.startingDir == Directions.right and child.x > child.startingX + child.distance then
 						listener1()
-					elseif child.startingDir == DIRECTION_LEFT and child.x >= child.startingX  then
+					elseif child.startingDir == Directions.left and child.x >= child.startingX  then
 						--child.x = child.startingX
 						listener1()
 					end
 				end	
 				
-				if child.direction == DIRECTION_UP then--and child.switchingSide == true then
+				if child.direction == Directions.up then--and child.switchingSide == true then
 				
-					--child.direction = DIRECTION_RIGHT
+					--child.direction = Directions.right
 					child:setLinearVelocity( 0, -child.speed )
 					--child.switchingSide = false
 					--child.rotation = child.rotation + 2
 					--transition.to(child,{rotation = 250, time = 1800,transition = easing.inOutExpo,onComplete = listener1})
-					if child.startingDir == DIRECTION_UP and child.y < child.startingY - child.distance then
+					if child.startingDir == Directions.up and child.y < child.startingY - child.distance then
 						listener1()
-					elseif child.startingDir == DIRECTION_DOWN and child.y <= child.startingY  then
+					elseif child.startingDir == Directions.down and child.y <= child.startingY  then
 						--child.x = child.startingX
 						listener1()
 					end
 				end
-				if child.direction == DIRECTION_DOWN then--and child.switchingSide == true then
+				if child.direction == Directions.down then--and child.switchingSide == true then
 				
-					--child.direction = DIRECTION_LEFT
+					--child.direction = Directions.left
 					--child.rotation = child.rotation - 2
 					child:setLinearVelocity( 0, child.speed )
 					--child:translate(2,0)
 					--child.switchingSide = false
-					if child.startingDir == DIRECTION_DOWN and child.y > child.startingY + child.distance then
+					if child.startingDir == Directions.down and child.y > child.startingY + child.distance then
 						listener1()
-					elseif child.startingDir == DIRECTION_UP and child.y >= child.startingY  then
+					elseif child.startingDir == Directions.up and child.y >= child.startingY  then
 						--child.x = child.startingX
 						listener1()
 					end
@@ -1550,7 +1420,7 @@ function Update(event)
 			handicon.y = handicon.originalY
 			handicon.isPlaying = true
 			handicon.alpha = 1
-			transition.to(handicon,{x=screenWidth * 0.58,y=handicon.y-150,time=1600,onComplete=rlistener})
+			transition.to(handicon,{x=screen.width * 0.58,y=handicon.y-150,time=1600,onComplete=rlistener})
 		end
 	end
 	
@@ -1563,7 +1433,7 @@ function Update(event)
 	if handicon	~= nil and handicon.activated == true and handicon.isPlaying == false then
 		handicon.isPlaying = true
 		timer.performWithDelay( 500, rlistener2)
-		--transition.to(handicon,{x=screenWidth * 0.58,y=handicon.y-150,time=1300,onComplete=rlistener})
+		--transition.to(handicon,{x=screen.width * 0.58,y=handicon.y-150,time=1300,onComplete=rlistener})
 	end
 	
 	if redArrow ~= nil then
@@ -1591,7 +1461,7 @@ function Update(event)
 
 	end
 	
-	if ENABLE_REVERSE == true then
+	if Enable.reverse == true then
 		
 		questionMark.x, questionMark.y = player:localToContent( 0, -50 )
 		questionMark.alpha = 1
@@ -1606,13 +1476,13 @@ function Update(event)
 		--end
 	
 		--Timer for Reverse player effect
-		if ENABLE_REVERSE == true then
+		if Enable.reverse == true then
 		
 			reverse_Timer = reverse_Timer + 1
 			
 			if reverse_Timer > 500 then		
 				reverse_Timer = 0
-				ENABLE_REVERSE = false
+				Enable.reverse = false
 				questionMark.alpha = 0
 			end
 		
@@ -1665,7 +1535,7 @@ function Update(event)
 	
 	if player ~= nil then
 		
-		player.xScale = (DIRECTION and 1 or DIRECTION)
+		player.xScale = (player.direction and 1 or player.direction)
 
 		mapPos.diff.x = mapPos.curr.x - mapPos.prev.x
 		mapPos.diff.y = mapPos.curr.y - mapPos.prev.y
@@ -1689,30 +1559,31 @@ function Update(event)
 		bg2.x = bg2.x - mapPos.diff.x * bg2.parallaxFactor
 		--bg2.y = bg2.y - mapPos.diff.y * bg2.parallaxFactorY
 	end
+
 	--Scrolling bg layers updates
-	if storyboard.currentWorld == 1 then
+	if storyboard.currentStage == 1 then
 		for i=1,2 do
 			if bgFront ~= nil then
 
-				if bgFront[i].x <= -screenWidth * 0.5 then	
-					--bgFront[i].x = screenWidth * 1.5 
+				if bgFront[i].x <= -screen.width * 0.5 then	
+					--bgFront[i].x = screen.width * 1.5 
 					if i == 1 then
-						--bgFront[2].x = screenWidth * 0.5
-						bgFront[1].x = bgFront[2].x + screenWidth
+						--bgFront[2].x = screen.width * 0.5
+						bgFront[1].x = bgFront[2].x + screen.width
 					else
-						--bgFront[1].x = screenWidth * 0.5
-						bgFront[2].x = bgFront[1].x + screenWidth
+						--bgFront[1].x = screen.width * 0.5
+						bgFront[2].x = bgFront[1].x + screen.width
 					end
 				end
 
-				if bgFront[i].x > screenWidth * 1.5 then	
-					--bgFront[i].x = -screenWidth * 0.5 
+				if bgFront[i].x > screen.width * 1.5 then	
+					--bgFront[i].x = -screen.width * 0.5 
 					if i == 1 then
-						bgFront[1].x = bgFront[2].x - screenWidth
-						--bgFront[2].x = bgFront[1].x  + screenWidth--screenWidth * 0.5
+						bgFront[1].x = bgFront[2].x - screen.width
+						--bgFront[2].x = bgFront[1].x  + screen.width--screen.width * 0.5
 					else
-						bgFront[2].x = bgFront[1].x - screenWidth
-						--bgFront[1].x = bgFront[2].x  + screenWidth--screenWidth * 0.5
+						bgFront[2].x = bgFront[1].x - screen.width
+						--bgFront[1].x = bgFront[2].x  + screen.width--screen.width * 0.5
 					end
 				end
 
@@ -1721,65 +1592,63 @@ function Update(event)
 			end
 		end
 	end
-
 	
-	if mapPos.diff.x == 0 and mapPos.diff.y == 0 and state.STATE ~= state.WALKING then
-		state.STATE = state.IDLE
-	elseif state.STATE ~= state.WALKING and (mapPos.diff.x ~= 0 or mapPos.diff.y ~=0) then
-		state.STATE = state.MOVING
+	if mapPos.diff.x == 0 and mapPos.diff.y == 0 and player.state ~= States.walking then
+		player.state = States.idle
+	elseif player.state ~= States.walking and (mapPos.diff.x ~= 0 or mapPos.diff.y ~= 0) then
+		player.state = States.moving
 	end
-	
 
 	--Screenshake function
-	if groupcs ~= nil and (ENABLE_DISTORTION == true or ENABLE_BLUR == true) then
+	if groupcs ~= nil and (Enable.distortion == true or Enable.blur == true) then
 			
 		local function captureWithDelay2()
 			--if groupcs ~= nil then
-			if ENABLE_DISTORTION == true or ENABLE_BLUR == true then
+			if Enable.distortion == true or Enable.blur == true then
 			
 				local img = display.captureScreen()
 				img.id = "cs"
 				
-				local scaleX = screenWidth/screenHeight
+				local scaleX = screen.width/screen.height
 				local r = {}
 				r.r1 = math.random(-scaleX,scaleX)
 				
 				
 				--Blur
-				if ENABLE_BLUR == true then
+				if Enable.blur == true then
 					
 					img.alpha = 0.71
-					img.y = screenHeight / 2 
+					img.y = screen.height / 2 
 					sfx_Timer = sfx_Timer + 1
 					if sfx_Timer > 70 then
 						
 						sfx_Timer = 0
-						ENABLE_BLUR = false
+						Enable.blur = false
 					end
 				
 				--Shake
-				elseif ENABLE_DISTORTION == true then
+				elseif Enable.distortion == true then
 
 					r.r2r = {}
 					r.r2r.r2 = math.random( 0,1 )
-					local scaleY = screenWidth/screenHeight * 5
+					local scaleY = screen.width/screen.height * 5
 					r.r3 = math.random(-scaleY,scaleY)
 					
 					img.alpha = 0.9
-					img.x = (screenWidth / 2) + r.r1
+					img.x = (screen.width / 2) + r.r1
 					-- if r.r2r.r2 == 0 then
-					-- 	img.y = (screenHeight / 2) + r.r1
+					-- 	img.y = (screen.height / 2) + r.r1
 					-- elseif r.r2 == 1 then
-					-- 	img.y = (screenHeight / 2) - r.r1
+					-- 	img.y = (screen.height / 2) - r.r1
 					-- end
-					img.y = screenHeight / 2
+					img.y = screen.height / 2
 					img:rotate(r.r3)
 					
 					sfx_Timer = sfx_Timer + 5
 					if sfx_Timer > 70 then
 						
 						sfx_Timer = 0
-						ENABLE_DISTORTION = false
+						Enable.distortion = false
 						
 						for i=1,storyboard.playerHealth do
 
@@ -1796,7 +1665,7 @@ function Update(event)
 					groupcs:insert(img)
 				end
 
-				if(ENABLE_DISTORTION == false and ENABLE_BLUR == false) then
+				if(Enable.distortion == false and Enable.blur == false) then
 					img.alpha = 0
 					display.remove(img)
 					img = nil
@@ -1808,10 +1677,10 @@ function Update(event)
 		end
 		sfx_delay = sfx_delay + 3
 			
-		if ENABLE_DISTORTION == true and sfx_delay > 39 then
+		if Enable.distortion == true and sfx_delay > 39 then
 			sfx_delay = 0
 			timer.performWithDelay( 100, captureWithDelay2 )
-		elseif ENABLE_BLUR == true and sfx_delay > 3 then
+		elseif Enable.blur == true and sfx_delay > 3 then
 			sfx_delay = 0
 			timer.performWithDelay( 100, captureWithDelay2 )
 		end
@@ -1823,9 +1692,9 @@ function Update(event)
 		
 			child = groupcs[i]
 			if child ~= nil and child.id == "cs" then
-				if ENABLE_DISTORTION == true then
+				if Enable.distortion == true then
 					child.alpha = child.alpha * 0.9 -- blur 0.6
-				elseif ENABLE_BLUR == true then
+				elseif Enable.blur == true then
 					child.alpha = child.alpha * 0.9
 				end
 				
@@ -1839,15 +1708,15 @@ function Update(event)
 	end
 	child = nil
 
-	if ENABLE_DISTORTION == false and ENABLE_BLUR == false then
+	if Enable.distortion == false and Enable.blur == false then
 		if groupcs ~= nil then
 			for i=groupcs.numChildren,1, -1 do
 			
 				child = groupcs[i]
 				if child ~= nil and child.id == "cs" then
-					--if ENABLE_DISTORTION == true then
+					--if Enable.distortion == true then
 						child.alpha = 0.0 -- blur 0.6		
-					--elseif ENABLE_BLUR == true then
+					--elseif Enable.blur == true then
 						--child.alpha = child.alpha * 0.7
 					--end
 					
@@ -1863,57 +1732,9 @@ function Update(event)
 	end
 	child = nil
 
-	--Player motion blur
-	if  ENABLE_PLAYERBLUR == true then--and ENABLE_BLUR == false and ENABLE_DISTORTION == false then
-	
-		local function captureWithDelay()
-			
-			if state.STATE ~= state.IDLE and player ~= nil and layer ~= nil then
-			--	layer = map:getObjectLayer("Player")
-				layer = map.layer["Player"]
-			--	playermb = display.newImageRect(layer.group,myCharSheet,currentFrame,36,36)
-				playermb = display.newImageRect(layer,myCharSheet,currentFrame,36,36)
-				--playermb = display.newImageRect(layer.group,"Images/Neg/Main Char Neg.png",36,36)
-				playermb.x = player.x--mapPos.prev.x--player.x + mapPos.curr.x 
-				playermb.y = player.y--mapPos.prev.y--player.y + mapPos.curr.y
-				playermb.alpha = 0.5
-				
-				playermb.id = "mb"
-				playermb:toBack()
-			end
-			
-		end
-
-		timer.performWithDelay( 80, captureWithDelay )
-		
-	end
-	
-	
-	
---	if layer ~= nil and layer.group ~= nil then
-	if layer ~= nil and layer ~= nil then
-	--	for i=layer.group.numChildren,1, -1 do
-		for i=layer.numChildren,1, -1 do
-		
-		--	local child = layer.group[i]
-			child = layer[i]
-			if child ~= nil and child.id == "mb" then
-				child.alpha = child.alpha * 0.65
-				if child.alpha == 0 then
-					 child.parent:remove( child )
-					 child = nil
-					 collectgarbage( "collect" )
-				end
-			end
-				
-		end
-	end
-	child = nil
-
-
 	local vx, vy = player:getLinearVelocity()
 	--Code for player left right movement
-	if player ~= nil and btnDown == false and state.STATE == state.WALKING and onIce == false and holdingBtn == false then
+	if player ~= nil and btnDown == false and player.state == States.walking and onIce == false and holdingBtn == false then
 		
 		-- if player has reached the tap destination
 		if math.abs(player.x - playerPrevPos.x) >= math.abs(touchDistFromPlayer.x) then
@@ -1925,18 +1746,32 @@ function Update(event)
 			transition.pause(tap_effect) -- remove tap_effect
 
 			-- if player has stopped moving, no velocity
-			if vx == 0 and vy == 0 then
-				state.STATE = state.IDLE
+			local clampDist = 1
+			if isInRange( {vx,vy} , -clampDist, clampDist ) then
+				player:setLinearVelocity( 0, 0 )
+				player.state = States.idle
 			end
 
 		-- else continue walking
 		elseif pushingCrate == true or onPlatform == false then
-			player:setLinearVelocity(200 * DIRECTION,vy)
+			player:setLinearVelocity(200 * player.direction,vy)
 		end
 		
 	end
 
-	--Code for holding down of the finger for jump
+	-- code for player jumping movement
+	if player.state == States.moving then
+
+		-- if player has stopped moving, no velocity
+		local clampDist = 1
+		if isInRange( {vx,vy} , -clampDist, clampDist ) then
+			player:setLinearVelocity( 0, 0 )
+			player.state = States.idle
+		end
+
+	end
+
+	-- Code for holding down of the finger for jump
 	if btnDown == true then		
 		btnDownTimer = btnDownTimer + 1
 		if btnDownTimer > 2 then
@@ -1946,8 +1781,7 @@ function Update(event)
 		end
 	end
 	
-
-	if map ~= nil then
+	if map ~= nil and not map.isTransitioning then
 		map.updateView()
 		mapPos.curr.x, mapPos.curr.y = map.getViewpoint()
 	end
@@ -1966,55 +1800,71 @@ function Update(event)
 		storyboard.showOverlay( "Popup", { params = { one = popup.text } } )
 	end
 
-end
+	if screen.bDebug then
+
+		-- some screen messages for debug
+		if touchHandler.numTouches > 0 then
+			screen.debugText.text = "numTouches : " .. tostring(touchHandler.numTouches)
+		else
+			screen.debugText.text = ""
+		end
+
+		screen.debugText.text = "numTouches : " .. tostring(touchHandler.numTouches)
+
+		screen.debugText3.text = "mapPos.curr.x : " .. tostring(mapPos.curr.x)
+		screen.debugText4.text = "mapPos.curr.y : " .. tostring(mapPos.curr.y)
+
+	end
+
+end 
 
 -- listener for touch event on Player
-function onTouchJump ( event )
+function onTouchPlayer ( event )
 
-	if storyboard.isPaused == false and player.invul == false then
+	if storyboard.isPaused == false and player.invul == false and
+		touchHandler.numTouches < 2 then
 	
 		local target = event.target
+
+		touchHandler:updateTouch(event)
 		
 		if event.phase == "began" then
 
+			if touchHandler.beganOn ~= "screen" then
+				touchHandler.beganOn = "player"
+			end
+
 			lineOrigin.x, lineOrigin.y = player:localToContent( 0, 0 )
 
-			--currentvalue += (finalvalue - currentvalue) * slidespeed
-			--	if holdingBtn == fa then
-				--	traject:setReferencePoint( display.TopLeftReferencePoint )
-					traject.width = 5
-					traject.alpha = 1
-					traject.x = lineOrigin.x - mapPos.curr.x
-					traject.y = lineOrigin.y - mapPos.curr.y - 5
-					traject_created = true
+			traject.width = 5
+			traject.alpha = 1
+			traject.x = lineOrigin.x - mapPos.curr.x
+			traject.y = lineOrigin.y - mapPos.curr.y - 5
+			traject_created = true
 				
-			--	end
 			holdingBtn = true
 			touchJumpX = event.x - mapPos.curr.x
 			touchJumpY = event.y - mapPos.curr.y
 					
-		elseif event.phase == "moved" then
-				
+		elseif	event.phase == "moved" and
+				touchHandler.beganOn == "player" and
+				touchHandler.numTouches < 2 then
+
 			btnDown = true
-			holdingBtn = true
 			if btnDown == true and traject_created == false and tutorial.step1 ~= true then
-				--traject_width = 5		
-				--traject = display.newRect(0,0,traject_width,5)
-				
-			--	traject:setReferencePoint( display.CenterLeftReferencePoint )
 				traject.alpha = 1
 				traject.x = lineOrigin.x + mapPos.curr.x
 				traject.y = lineOrigin.y + mapPos.curr.y - 5
 				traject_created = true
 			end
+
 			
 		elseif event.phase == "ended" then 
+
 			btnDown = false
 			btnDownTimer = 0
-			holdingBtn = true
 
 		end
-
 		
 		return true
 	
@@ -2024,22 +1874,29 @@ end
 
 --Function for both click to move, and drag to and release to jump
 local function onTouch(event)
-	
+
 	if storyboard.isPaused == false then
+
+		touchHandler:updateTouch(event)
 
 		if player ~= nil  and player.invul == false then
 
 			if event.phase == "began" then 
+
+				if touchHandler.beganOn ~= "player" then touchHandler.beganOn = "screen" end
+
 				b_Idle = false
 				player:setFrame(1)
 
 				lineOrigin.x, lineOrigin.y = player:localToContent( 0, 0 )
+
+				mapPos.before_touch.x, mapPos.before_touch.y = map.getViewpoint()
 				
 			elseif event.phase == "moved" then 
 				b_Idle = false
 				
 				pauseBtn:setEnabled(false)
-				--traject:setReferencePoint( display.TopLeftReferencePoint )
+
 				if holdingBtn == true then
 					
 					local widthcheck = CalculateDistance(event.x, event.y, lineOrigin.x, lineOrigin.y)
@@ -2059,13 +1916,66 @@ local function onTouch(event)
 						traject.width = widthcheck
 					end
 					
-				--	traject:setReferencePoint( display.CenterLeftReferencePoint )
 					traject.alpha = 1
 					traject.x = lineOrigin.x
 					traject.y = lineOrigin.y
 					local dir = math.atan2(( event.y - lineOrigin.y ), ( event.x - lineOrigin.x )) * 180 / math.pi
 					traject:rotate(dir - prevAngle )
 					prevAngle = dir
+
+				elseif player.state == States.idle and touchHandler.beganOn == "screen" then
+
+					if touchHandler.numTouches == 1 then -- one touch, look around map
+
+						-- manipulate the screen to look around the map
+						local diff_pos = { x = event.x - event.xStart, y = event.y - event.yStart }
+						local newMapPos = { x = mapPos.before_touch.x - diff_pos.x, y = mapPos.before_touch.y - diff_pos.y }
+
+						-- make sure moving of the camera doesn't go out of bound
+						newMapPos.x = clamp( newMapPos.x, screen.width / 2, (map.data.width * map.xScale) - (screen.width / 2) )
+						newMapPos.y = clamp( newMapPos.y, screen.height / 2, (map.data.height * map.yScale) - (screen.height / 2) )
+
+						map.enableFocusTracking(false)
+						map.positionCamera( newMapPos.x, newMapPos.y )
+
+						touchHandler.isMovingMap = true
+
+						--	screen.debugText.text = "isMovingMap"
+--[[
+					elseif touchHandler.numTouches > 1 then -- two or more touches, zoom in/out
+
+						map.enableFocusTracking(true)
+
+						-- get this touch and the last active touch
+						local touch1, touch2 = touchHandler.activeTouch, touchHandler.lastActiveTouch
+
+						local currZoomDist = touchHandler.distBetween(touch1,touch2)
+						local zoomAmt = 0
+						local zoomFactor = 50
+						local newMapScale = { x = map.xScale, y = map.yScale }
+
+						if touchHandler.prevZoomDist == 0 then
+							touchHandler.prevZoomDist = currZoomDist
+						end
+
+						zoomAmt = (currZoomDist - touchHandler.prevZoomDist) / zoomFactor
+
+						touchHandler.prevZoomDist = currZoomDist
+
+						newMapScale.x = newMapScale.x + (newMapScale.x * zoomAmt)
+						newMapScale.y = newMapScale.y + (newMapScale.y * zoomAmt)
+
+						screen.debugText2.text = "newMapScale.y : " .. tostring( newMapScale.y )
+
+						clamp( newMapScale, 0.6, 1.5 )
+
+						map.xScale = newMapScale.x ~= 0 and newMapScale.x or map.xScale
+						map.yScale = newMapScale.y ~= 0 and newMapScale.y or map.yScale
+
+						touchHandler.isZoomingMap = true
+]]
+					end
+
 				end
 				
 			elseif event.phase == "ended" then 
@@ -2084,7 +1994,7 @@ local function onTouch(event)
 					local maxY = 20;
 					local minY = 0.0;
 					
-					state.STATE = state.MOVING
+					player.state = States.moving
 					local maxLimit = 1
 						
 					local dir = math.atan2(( event.y - lineOrigin.y ), ( event.x - lineOrigin.x ))
@@ -2114,16 +2024,14 @@ local function onTouch(event)
 					if forceY <= minY and event.y >= lineOrigin.y then
 					--	forceY = minY
 					end
-					
-				--	if tutorial.step2 ~= true then
 
 						if inAir == false or player.canJump == true then
 
 							player:setLinearVelocity( 0, 0 )
 
-							if ENABLE_REVERSE == false then 
+							if Enable.reverse == false then 
 								player:applyLinearImpulse( forceX, forceY, player.x, player.y) 
-							elseif ENABLE_REVERSE == true then
+							elseif Enable.reverse == true then
 								player:applyLinearImpulse( -forceX, forceY, player.x, player.y) 
 							end
 							
@@ -2134,9 +2042,9 @@ local function onTouch(event)
 								player:setLinearVelocity( 0, 0 )
 
 								--forceY = forceY * 0.5
-								if ENABLE_REVERSE == false then
+								if Enable.reverse == false then
 									player:applyLinearImpulse( forceX, forceY, player.x, player.y) 
-								elseif ENABLE_REVERSE == true then						
+								elseif Enable.reverse == true then						
 									player:applyLinearImpulse( -forceX, forceY, player.x, player.y) 
 								end
 
@@ -2144,15 +2052,13 @@ local function onTouch(event)
 							
 						end
 
-				--	elseif tutorial.step2 == true and traject.width > 150 and event.x > player.x + 50 then
-					if tutorial.step2 == true then -- and traject.width > 150 and event.x > lineOrigin.x + 50 then
-					--	player:applyLinearImpulse( maxX-1, -maxY, player.x, player.y) 
+					if tutorial.step2 == true then
 
 						display.remove(tutorial_Bg2)
 						tutorial_Bg2 = nil
 						tutorial_Bg3 = display.newImageRect("Images/Visual_Feedback/Tutorial/land.png",192,64)
-						tutorial_Bg3.x = screenWidth*0.5
-						tutorial_Bg3.y = screenHeight*0.7
+						tutorial_Bg3.x = screen.width*0.5
+						tutorial_Bg3.y = screen.height*0.7
 						transition.to(tutorial_Bg3,{alpha = 0,time = 4500})
 						
 						--handicon:removeSelf()
@@ -2166,9 +2072,9 @@ local function onTouch(event)
 					end
 					
 					if forceX > 0 then
-						DIRECTION = DIRECTION_RIGHT
+						player.direction = Directions.right
 					else 
-						DIRECTION = DIRECTION_LEFT
+						player.direction = Directions.left
 					end
 
 					transition.pause(tap_effect)
@@ -2178,25 +2084,26 @@ local function onTouch(event)
 						holdingBtn == false and
 						player.canJump == true and
 						inAir == false and
-						(state.STATE == state.IDLE or pushingCrate == true or onPlatform == true) then
+						(player.state == States.idle or pushingCrate == true or onPlatform == true) and
+						touchHandler.isMovingMap == false and
+						touchHandler.isZoomingMap == false then
 
 					playerPrevPos.x, playerPrevPos.y = player.x, player.y
 					touchDistFromPlayer.x = math.abs(event.x - lineOrigin.x)
 					touchDistFromPlayer.y = math.abs(event.y - lineOrigin.y)
 
 					player:setLinearVelocity( 0, 0 )
-					--if pushingCrate == false then
-					state.STATE = state.WALKING
+					player.state = States.walking
 					
 					if event.x > lineOrigin.x then
-						DIRECTION = DIRECTION_RIGHT
+						player.direction = Directions.right
 					elseif event.x < lineOrigin.x then
-						DIRECTION = DIRECTION_LEFT
-					end
+						player.direction = Directions.left
+					end 
 
-					if ENABLE_REVERSE then
-						DIRECTION = DIRECTION * -1
-						tap_effect.x = lineOrigin.x + touchDistFromPlayer.x * DIRECTION
+					if Enable.reverse then
+						player.direction = player.direction * -1
+						tap_effect.x = lineOrigin.x + touchDistFromPlayer.x * player.direction
 					else
 					
 					tap_effect.x = event.x end					
@@ -2215,17 +2122,65 @@ local function onTouch(event)
 										end,
 							onCancel = onPause
 						})
+
 				end
 				
-				--if holdingBtn == true then
 				traject.width = 5
 				traject.alpha = 0
 				traject.x = lineOrigin.x
 				traject_created = false
-				--end
 				btnDown = false
 				btnDownTimer = 0
 				holdingBtn = false
+
+				-- transition back to original position
+				-- if map is not in the original position before the player looked around
+				if not compareTable(mapPos.curr, mapPos.before_touch) then
+
+					-- initialise the step
+					local step = 5
+					mapPos.delta.x = (mapPos.curr.x - mapPos.before_touch.x) / step
+					mapPos.delta.y = (mapPos.curr.y - mapPos.before_touch.y) / step
+
+					function moveScreenToPlayer()
+
+						if not map then return end -- fixes crash at end of level
+
+						if isInRange(mapPos.curr.x, mapPos.before_touch.x - 5, mapPos.before_touch.x + 5) and 
+							isInRange(mapPos.curr.y, mapPos.before_touch.y - 5, mapPos.before_touch.y + 5) then
+
+							mapPos.delta.x, mapPos.delta.y = 0, 0
+							mapPos.before_touch.x, mapPos.before_touch.y = 0, 0
+
+							map.enableFocusTracking(true)
+							map.setCameraFocus(player)
+
+							map.isTransitioning = false
+							Runtime:removeEventListener( "enterFrame", moveScreenToPlayer )
+
+						else
+
+							mapPos.curr.x = mapPos.curr.x - mapPos.delta.x
+							mapPos.curr.y = mapPos.curr.y - mapPos.delta.y
+							map.setViewpoint(mapPos.curr.x, mapPos.curr.y)
+
+						end
+
+						map.updateView()
+
+					end
+
+					map.isTransitioning = true
+					Runtime:addEventListener("enterFrame", moveScreenToPlayer)
+
+				end
+
+				touchHandler:reset()
+
+				if touchHandler.numTouches < 2 then
+					map.xScale, map.yScale = 1,1
+					screen.debugText2.text = ""
+				end
 
 			end -- event.phase check
 
@@ -2277,7 +2232,7 @@ function onCollision( event )
 		elseif event.other.IsIce then
 		
             onIce = true
-			state.STATE = state.MOVING
+			player.state = States.moving
 			
 		elseif event.other.IsPlatform then
 			
@@ -2292,31 +2247,29 @@ function onCollision( event )
 				--end
 			elseif vyy > 0 or player.y < event.other.y then
 				event.other.isSensor = false
-				state.STATE = state.IDLE
+				player.state = States.idle
 				player.canJump = true
 				onPlatform = true
 				inAir = false
 				btnDown = false 
 				holdingBtn = false
-				--player.bodyType = "static"
-				--player.gravityScale = 0
 			end
 			
-		elseif event.other.IsExit and storyboard.isPaused == false then--and inAir == false then
+		elseif event.other.IsExit and storyboard.isPaused == false then
 			
 			local function nextScene ( event )
 				
-				local numStars = gameData.myTable.levelData[storyboard.currentWorld][storyboard.currentLevel].stars
+				local numStars = gameData.levelData[storyboard.currentStage][storyboard.currentLevel].stars
 				if storyboard.playerHealth > 4 then
-					gameData.myTable.levelData[storyboard.currentWorld][storyboard.currentLevel].stars = 3
+					gameData.levelData[storyboard.currentStage][storyboard.currentLevel].stars = 3
 				elseif storyboard.playerHealth >= 3 and numStars ~= 3 then
-					gameData.myTable.levelData[storyboard.currentWorld][storyboard.currentLevel].stars = 2
+					gameData.levelData[storyboard.currentStage][storyboard.currentLevel].stars = 2
 				elseif storyboard.playerHealth >= 1 and numStars < 2 then
-					gameData.myTable.levelData[storyboard.currentWorld][storyboard.currentLevel].stars = 1
+					gameData.levelData[storyboard.currentStage][storyboard.currentLevel].stars = 1
 				end
 				
-				if storyboard.currentLevel ~= 8 and gameData.myTable.levelData[storyboard.currentWorld][storyboard.currentLevel+1].locked == true then
-					gameData.myTable.levelData[storyboard.currentWorld][storyboard.currentLevel+1].locked = false
+				if storyboard.currentLevel ~= 8 and gameData.levelData[storyboard.currentStage][storyboard.currentLevel+1].locked == true then
+					gameData.levelData[storyboard.currentStage][storyboard.currentLevel+1].locked = false
 				end
 
 				storyboard.firstEntry = true
@@ -2347,8 +2300,8 @@ function onCollision( event )
 				playermb.alpha = 0
 			end
 
-			state.STATE = state.IDLE
-			ENABLE_PLAYERBLUR = false
+			player.state = States.idle
+			Enable.playerBlur = false
 			transition.to(player,{x=event.other.x,time=300,onComplete = listener1})
 
 		elseif event.other.IsPit then
@@ -2360,7 +2313,7 @@ function onCollision( event )
 					pauseBtn.alpha = 1
 				end
 
-				ENABLE_REVERSE = false
+				Enable.reverse = false
 				questionMark.alpha = 0
 
 				decreaseHealth(1)
@@ -2369,7 +2322,7 @@ function onCollision( event )
 					system.vibrate() -- Vibrate the device
 				end
 				--decreaseHealth(1)
-				state.STATE = state.IDLE
+				player.state = States.idle
 				player:setLinearVelocity(0,0)
 				player.invul = true
 				transition.to(player,{x =  player.originalX, y = player.originalY, time = 300,onComplete = disableInvul})
@@ -2384,7 +2337,7 @@ function onCollision( event )
 					pauseBtn.alpha = 1
 				end
 
-				ENABLE_REVERSE = false
+				Enable.reverse = false
 				questionMark.alpha = 0
 
 				decreaseHealth(1)
@@ -2393,7 +2346,7 @@ function onCollision( event )
 					system.vibrate() -- Vibrate the device
 				end
 				--decreaseHealth(1)
-				state.STATE = state.IDLE
+				player.state = States.idle 
 				player:setLinearVelocity(0,0)
 				player.invul = true
 				transition.to(player,{x =  player.originalX, y = player.originalY, time = 200,onComplete = disableInvul})
@@ -2410,7 +2363,7 @@ function onCollision( event )
 				end
 				decreaseHealth(1)
 				--decreaseHealth(1)
-				state.STATE = state.IDLE
+				player.state = States.idle
 				player:setLinearVelocity(0,0)
 				player.invul = true
 				transition.to(player,{x =  player.originalX, y = player.originalY, time = 200,onComplete = disableInvul})
@@ -2431,7 +2384,7 @@ function onCollision( event )
 					system.vibrate() -- Vibrate the device
 				end
 				--decreaseHealth(1)
-				state.STATE = state.IDLE
+				player.state = States.idle
 				player:setLinearVelocity(0,0)
 				player.invul = true
 				transition.to(player,{x =  player.originalX, y = player.originalY, time = 200,onComplete = disableInvul})
@@ -2450,7 +2403,7 @@ function onCollision( event )
 					system.vibrate() -- Vibrate the device
 				end
 					
-					ENABLE_REVERSE = true
+					Enable.reverse = true
 					
 					questionMark.alpha = 1
 					questionMark:play()
@@ -2480,7 +2433,7 @@ function onCollision( event )
 					system.vibrate() -- Vibrate the device
 				end
 					
-					ENABLE_DISTORTION = true
+					Enable.distortion = true
 					
 					local listener1 = function()
 						if item ~= nil then
@@ -2504,7 +2457,7 @@ function onCollision( event )
 					print( "Vibrate the device" )
 					system.vibrate() -- Vibrate the device
 				end
-					ENABLE_DISTORTION = true
+					Enable.distortion = true
 					
 					player.invul = true
 					
@@ -2534,7 +2487,7 @@ function onCollision( event )
 						system.vibrate() -- Vibrate the device
 					end
 						
-						state.STATE = state.IDLE
+						player.state = States.idle
 						player:setLinearVelocity(0,0)
 						transition.to(player,{x =  player.originalX, y = player.originalY, time = 200})
 					end
@@ -2555,7 +2508,7 @@ function onCollision( event )
 					print( "Vibrate the device" )
 					system.vibrate() -- Vibrate the device
 				end
-					ENABLE_DISTORTION = true
+					Enable.distortion = true
 					
 					for i=1,storyboard.playerHealth do
 						pauseBtn.alpha = 0
@@ -2589,7 +2542,7 @@ function onCollision( event )
 					system.vibrate() -- Vibrate the device
 				end
 					
-					ENABLE_DISTORTION = true
+					Enable.distortion = true
 					
 					for i=1,storyboard.playerHealth do
 						pauseBtn.alpha = 0
@@ -2610,7 +2563,7 @@ function onCollision( event )
 					system.vibrate() -- Vibrate the device
 				end
 					
-					ENABLE_REVERSE = true
+					Enable.reverse = true
 					
 					questionMark.alpha = 1
 					questionMark:play()
@@ -2670,20 +2623,16 @@ function onCollision( event )
 			tutorial.step1 = false
 			tutorial.step2 = true
 			
-			if tutorial.step2 == true then
-				
-				display.remove(tutorial_Bg1)
-				tutorial_Bg1 = nil
-				
-				tutorial_Bg2 = display.newImageRect("Images/Visual_Feedback/Tutorial/Jump.png",192,64)
-				tutorial_Bg2.x = screenWidth*0.75
-				tutorial_Bg2.y = screenHeight*0.65
-				tutorial_Bg2.alpha = 0.9
-				
-			end
+			display.remove(tutorial_Bg1)
+			tutorial_Bg1 = nil
 			
-			state.STATE = state.IDLE
-			transition.to(player, { x=item.x,time = 300 })
+			tutorial_Bg2 = display.newImageRect("Images/Visual_Feedback/Tutorial/Jump.png",192,64)
+			tutorial_Bg2.x = screen.width*0.75
+			tutorial_Bg2.y = screen.height*0.65
+			tutorial_Bg2.alpha = 0.9
+			
+			player.state = States.idle
+			transition.to(player, { x = item.x, time = 300 })
 			transition.to(item, { time = 200, alpha = 0, onComplete = onTransitionEnd })
 			transition.to(taphereText, { time = 200, alpha = 0, onComplete = onTransitionEnd2 })
 			transition.pause(tap_effect)
@@ -2753,7 +2702,7 @@ function decreaseHealthObj(h)
 			--end
 				
 	else
-		ENABLE_DISTORTION = false
+		Enable.distortion = false
 
 		if groupcs ~= nil then
 		for i=groupcs.numChildren,1, -1 do
@@ -2800,13 +2749,13 @@ function decreaseHealthEnemy(h)
 
 	if player.invul == false then
 		if storyboard.playerHealth > h then
-			if ENABLE_DISTORTION == false then
+			if Enable.distortion == false then
 				storyboard.playerHealth  = storyboard.playerHealth - h
 				player.playerHealth = storyboard.playerHealth
-				ENABLE_DISTORTION = false
+				Enable.distortion = false
 			end
 		else
-			ENABLE_DISTORTION = false
+			Enable.distortion = false
 			
 			if groupcs ~= nil then
 				for i=groupcs.numChildren,1, -1 do
@@ -2855,14 +2804,14 @@ function decreaseHealthEnemy(h)
 	
 		life = playerMaxHealth - storyboard.playerHealth + 1
 		
-		if storyboard.currentWorld == 1 then
+		if storyboard.currentStage == 1 then
 			for i = 1,2 do
 				bgBase:setFrame( life )
 				bgFront[i]:setFrame( life )
 			end
 		end
 		
-		if storyboard.currentWorld == 2 then
+		if storyboard.currentStage == 2 then
 			bg2:setFrame(life)
 		end
 		
@@ -2879,7 +2828,7 @@ function decreaseHealth(h)
 
 	if player.invul == false then
 		if storyboard.playerHealth > h then
-			--if ENABLE_DISTORTION == false then
+			--if Enable.distortion == false then
 				storyboard.playerHealth  = storyboard.playerHealth - h
 				player.playerHealth = storyboard.playerHealth
 				blackbox.alpha = 1.0 -- later
@@ -2892,12 +2841,12 @@ function decreaseHealth(h)
 					end
 				end
 				timer.performWithDelay(300,listener1)
-				ENABLE_DISTORTION = false
+				Enable.distortion = false
 				
 			--end
 			
 		else
-			ENABLE_DISTORTION = false
+			Enable.distortion = false
 			
 			if groupcs ~= nil then
 				for i=groupcs.numChildren,1, -1 do
@@ -2924,13 +2873,13 @@ function decreaseHealth(h)
 			DeathBg:play()		
 			pauseBtn.alpha = 1
 			local listener1 = function()
-			local options =
-			{
-				effect = "fade",
-				time = 500,
-			}
-			storyboard.gotoScene("LevelSelect",options)	
-			storyboard.firstEntry = true
+				local options =
+				{
+					effect = "fade",
+					time = 500,
+				}
+				storyboard.gotoScene("LevelSelect",options)	
+				storyboard.firstEntry = true
 			end
 			if storyboard.isPaused == false then
 				timer.performWithDelay(4500,listener1)
@@ -2943,13 +2892,13 @@ function decreaseHealth(h)
 		--myHealthbar:setFrame( life )
 		-- Here
 		--player:setFrame(life)
-		if storyboard.currentWorld == 1 then
+		if storyboard.currentStage == 1 then
 			for i = 1,2 do
 				bgBase:setFrame( life )
 				bgFront[i]:setFrame( life )
 			end
 		end
-		if storyboard.currentWorld == 2 then
+		if storyboard.currentStage == 2 then
 			bg2:setFrame(life)
 		end
 		
@@ -2971,41 +2920,264 @@ end
 
 function onKeyEvent( event )
 
-   local phase = event.phase
-   local keyName = event.keyName
+	local phase = event.phase
+	local keyName = event.keyName
+ 
+	print(keyName .. " " .. phase)
 
-   print(keyName)
+	if "f" == keyName then
 
-	if ( "escape" == keyName ) then
+		local fakeTouchEvent = 
+		{
+			id = "fakeTouch",
+			name = "touch",
+			phase = "began",
+			x = 100,
+			y = 100,
+			xStart = 0, 
+			yStart = 0
+		}
+
+		if phase == "down" then
+			touchHandler:addTouch(fakeTouchEvent)
+		else
+			fakeTouchEvent.phase = "ended"
+			touchHandler:removeTouch(fakeTouchEvent)
+		end
+
+	end
+
+	if phase ~= "down" then return true end
+
+	if "escape" == keyName then
 		storyboard.showOverlay( "ExitScreen" )
+	elseif "back" == keyName then
+		onButtonEvent{ target = { id = "pause_btn" } }
 	elseif "tab" == keyName then
 		onCollision( { other = { IsExit = true, x = 0.0, y = 0.0 }, phase = "began" } )
 	end
 
---Volume Control(Working with keypad for now)
-   if ( keyName == "volumeUp" and phase == "down" ) then --Key that is used/pressed to increase volume.
-      local masterVolume = audio.getVolume()
-      print( "Volume:", masterVolume )
-      if ( masterVolume < 1.0 ) then 
-         masterVolume = masterVolume + 0.1 -- Increase the volume by 0.1 whenever up key is pressed.
-         audio.setVolume(masterVolume ) -- Set the new mastervolume affter increasing the volume.
-      end
+	--Volume Control(Working with keypad for now)
+	if keyName == "volumeUp" then --Key that is used/pressed to increase volume.
+		local masterVolume = audio.getVolume()
+		print( "Volume:", masterVolume )
+		if ( masterVolume < 1.0 ) then 
+			masterVolume = masterVolume + 0.1 -- Increase the volume by 0.1 whenever up key is pressed.
+			audio.setVolume(masterVolume ) -- Set the new mastervolume affter increasing the volume.
+		end
 
-   elseif ( keyName == "volumeDown" and phase == "down" ) then -- Key that is used/pressed to decrease the volume.
+	elseif keyName == "volumeDown" then -- Key that is used/pressed to decrease the volume.
 
-      local masterVolume = audio.getVolume()
-      print( "Volume:", masterVolume )
-      if ( masterVolume > 0.0 ) then
-         masterVolume = masterVolume - 0.1 -- Decrease the volume by 0.1 whenever down key is pressed.
-         audio.setVolume( masterVolume ) -- Set the new mastervolume affter decreasing the volume.
-      end
+		local masterVolume = audio.getVolume()
+		print( "Volume:", masterVolume )
+		if ( masterVolume > 0.0 ) then
+			masterVolume = masterVolume - 0.1 -- Decrease the volume by 0.1 whenever down key is pressed.
+			audio.setVolume( masterVolume ) -- Set the new mastervolume affter decreasing the volume.
+		end
 
-   end
-   return true  --SEE NOTE BELOW
+	end
+
+	return true  --SEE NOTE BELOW
 end
 
 --add the key callback
 Runtime:addEventListener( "key", onKeyEvent )
+
+
+-- Called when scene is about to move offscreen:
+function scene:exitScene( event )
+	
+	
+	-----------------------------------------------------------------------------
+	
+	--	INSERT code here (e.g. stop timers, remove listeners, unload sounds, etc.)
+	
+	-----------------------------------------------------------------------------
+	
+end
+
+
+-- Called prior to the removal of scene's "view" (display group)
+function scene:destroyScene( event )
+	local group = self.view
+	
+	
+	--Runtime:removeEventListener("enterFrame", Update)
+	--Runtime:removeEventListener("touch", onTouch)
+	-----------------------------------------------------------------------------
+	
+	--	INSERT code here (e.g. remove listeners, widgets, save player.state, etc.)
+	
+	-----------------------------------------------------------------------------
+
+	
+	local group = self.view
+	
+	if map ~= nil then
+	--	map:destroy()
+		map.destroy()
+		map = nil
+	end
+	Runtime:removeEventListener( "key", onKeyEvent )
+	
+	display.remove(tap_effect)
+	tap_effect = nil
+	
+	display.remove(traject)
+	traject = nil
+	
+	Runtime:removeEventListener("enterFrame", moveScreenToPlayer)
+	Runtime:removeEventListener("enterFrame", Update)
+	Runtime:removeEventListener("touch", onTouch)
+
+	for i=1,4 do
+		if banner_trans[i] ~= nil then
+			transition.cancel(banner_trans[i])
+		end
+	end
+	
+	--Remove tutorial text boxes
+	display.remove(tutorial_Bg1)
+	tutorial_Bg1 = nil
+	display.remove(tutorial_Bg2)
+	tutorial_Bg2 = nil
+	display.remove(tutorial_Bg3)
+	tutorial_Bg3 = nil
+	
+	if trans_blackbox ~= nil then
+		transition.cancel(trans_blackbox)
+	end
+	
+	-- remove them
+	display.remove(HeartSprite1)
+	display.remove(HeartSprite2)
+	display.remove(HeartSprite3)
+	display.remove(HeartSprite4)
+	display.remove(HeartSprite5)
+	
+	for i=1,2 do
+		display.remove(bgBase)
+		bgBase = nil
+		display.remove(bgFront[i])
+		bgFront[i] = nil
+	end
+	for i=1,playerMaxHealth do
+	
+		if myHearts[i] ~= nil then
+			display.remove(myHearts[i])
+			myHearts[i] = nil
+		end
+		
+	end
+	
+	display.remove(blackbox)
+	blackbox = nil
+	
+	if redArrow ~= nil then
+		--display.remove(redArrow)
+		--redArrow = nil
+		
+	end
+	if handicon~= nil then
+		--display.remove(handicon)
+		--handicon = nil
+	end
+	if taphereText~= nil then
+		--display.remove(taphereText)
+		--taphereText = nil
+	end
+	
+	display.remove(bg)
+	bg = nil
+	display.remove(bg2)
+	bg2 = nil
+	reverse_Timer = 0
+	Enable.reverse = false
+	--questionMark.alpha = 0
+	display.remove(questionMark)
+	questionMark = nil
+	display.remove(pauseBtn)
+	pauseBtn = nil
+
+	display.remove(banner_bg)
+	banner_bg = nil
+	
+	display.remove(banner_text)
+	banner_text = nil
+
+	player:removeSelf()
+
+	if player ~= nil then
+		player:removeEventListener("touch", onTouchPlayer)
+		display.remove(player)
+		player = nil
+	end
+	
+	for i=#pendulum,1,-1 do
+		pendulum[i] = nil
+	end
+	for i=#pendulumSupport,1,-1 do
+		pendulumSupport[i] = nil
+	end
+	for i=#platform,1,-1 do
+		platform[i] = nil
+	end
+	
+	-- new
+	if #enemyList > 0 then
+		enemyList[1].DestroyAll()
+	end
+	for e = #enemyList,1,-1 do
+		table.remove(enemyList, e)
+	end
+	
+	if popup ~= nil then
+		physics.removeBody(popup)
+		popup = nil
+	end
+	
+	display.remove(obstacleLayer)
+	obstacleLayer = nil
+	display.remove(collectableLayer)
+	collectableLayer = nil
+	display.remove(DeathBg)
+	DeathBg = nil
+	Enable.distortion = false
+	Enable.blur = false
+	Enable.playerBlur = false
+	
+	--End of Screenshake function
+	if groupcs ~= nil then
+		for i=groupcs.numChildren,1, -1 do
+		
+			local child = groupcs[i]
+
+				child.alpha = 0 -- blur 0.6		
+			
+				--if child.alpha == 0 then
+					 child.parent:remove( child )
+					 child = nil
+				--end
+			
+		end
+
+	end
+	--groupcs:removeSelf()
+	groupcs = nil
+	--playermb:removeSelf()
+	playermb = nil
+
+	display.remove(screen.debugText)
+	display.remove(screen.debugText2)
+	display.remove(screen.debugText3)
+	display.remove(screen.debugText4)
+	display.remove(screen.debugText5)
+
+	screen = nil
+
+	touchHandler = nil
+
+end
 
 ---------------------------------------------------------------------------------
 -- END OF YOUR IMPLEMENTATION

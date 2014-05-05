@@ -38,7 +38,7 @@ local group = display.newGroup()
 local groupStatic = display.newGroup()
 
 local currentPage = 1
-local maxPage = gameData.GetNumOfWorlds()
+local maxPage = gameData.GetNumOfStages()
 
 local dot_gap = 21
 ---------------------------------------------------------------------------------
@@ -54,9 +54,7 @@ local function onButtonEvent(event)
 	if btn.id ~= "close_btn" and btn.id ~= "unlock_btn" then
 	
 		storyboard.currentLevel = btn.id
-		storyboard.currentWorld = btn.world_id
-		--print("id : ",btn.id)
-		print("world :",btn.world_id)
+		storyboard.currentStage = btn.world_id
 		
 		local function nextScene ( event )
 			storyboard.gotoScene( "GameScene")--,"slideLeft",600)
@@ -78,8 +76,8 @@ local function onButtonEvent(event)
 		for i = 1,1 do 
 			for j = 1,8 do
 
-				gameData.myTable.levelData[i][j].locked = false 
-				if gameData.myTable.levelData[i][j].locked == false then
+				gameData.levelData[i][j].locked = false 
+				if gameData.levelData[i][j].locked == false then
 					if buttonLock[i][j] ~= nil then
 						buttonLock[i][j].alpha = 0
 						display.remove(buttonLock[i][j])
@@ -93,8 +91,8 @@ local function onButtonEvent(event)
 		for i = 2,2 do 
 			for j = 1,8 do
 
-				gameData.myTable.levelData[i][j].locked = false 
-				if gameData.myTable.levelData[i][j].locked == false then
+				gameData.levelData[i][j].locked = false 
+				if gameData.levelData[i][j].locked == false then
 					if buttonLock[i][j] ~= nil then
 						buttonLock[i][j].alpha = 0
 						display.remove(buttonLock[i][j])
@@ -114,6 +112,9 @@ end
 -- Called when the scene's view does not exist:
 function scene:createScene( event )
 	local group = self.view
+
+	storyboard.removeScene( "GameScene" )
+
 	collectgarbage( "collect" )
 	print("GARBAGE : "..collectgarbage("count")/1000)
 	groupBg = display.newGroup()
@@ -130,10 +131,9 @@ function scene:createScene( event )
 	dot_yellow.y = math.floor(screenHeight*0.95)
 	--groupStatic:insert(dot_yellow)
 
-	for i = 1, gameData.GetNumOfWorlds() do
+	for i = 1, gameData.GetNumOfStages() do
 
 		local bg_filename = "Images/Level_Select_Screen/bg_Stage_" .. i .. ".png"
-		print(bg_filename)
 
 		bgs[i] = display.newImageRect(bg_filename,screenWidth ,screenHeight )
 		bgs[i].x = math.floor(screenWidth * (0.5 + i-1))
@@ -207,7 +207,7 @@ function scene:createScene( event )
 
 			end
 		
-			for k=1,gameData.myTable.levelData[i][j].stars do
+			for k=1,gameData.levelData[i][j].stars do
 				local temp = display.newImageRect("Images/Level_Select_Screen/Star.png",28,28)
 				temp.x = button[i][j].x - screenWidth * 0.034 + (screenWidth * 0.036 * (k-1))
 				temp.y = button[i][j].y + (screenHeight * 0.085)
@@ -217,10 +217,10 @@ function scene:createScene( event )
 		end
 	end
 	
-	if storyboard.currentWorld >= 2 then
+	if storyboard.currentStage >= 2 then
 		--groupBg.x = groupBg.x - screenWidth
 		--groupStars.x = groupStars.x - screenWidth
-		transition.to(groupBg, {x = groupBg.x - screenWidth * (storyboard.currentWorld - 1), time=100})
+		transition.to(groupBg, {x = groupBg.x - screenWidth * (storyboard.currentStage - 1), time=100})
 		dot_yellow.x = dot_yellow.x + 21
 		currentPage = currentPage + 1
 	end
@@ -228,7 +228,7 @@ function scene:createScene( event )
 	-- get the data
 	for i = 1,maxPage do
 		for j = 1,8 do
-			if gameData.myTable.levelData[i][j].locked == false then
+			if gameData.levelData[i][j].locked == false then
 				buttonLock[i][j].alpha = 0
 				display.remove(buttonLock[i][j])
 				buttonLock[i][j] = nil
@@ -292,7 +292,6 @@ end
 -- Called immediately after scene has moved onscreen:
 function scene:enterScene( event )
 	local screenGroup = self.view
-	print( "1: enterScene event" )
 	
 	storyboard.isPaused = false
 	storyboard.playerHealth = 5
@@ -358,7 +357,6 @@ end
 function scene:destroyScene( event )
 	storyboard.purgeScene( "GameScene" )
 	storyboard.removeScene( "GameScene" )
-	print( "((destroying scene 1's view))" )
 	Runtime:removeEventListener("touch", onTouch)
 end
 
@@ -396,6 +394,12 @@ function onKeyEvent( event )
 
 	local phase = event.phase
 	local keyName = event.keyName
+
+	print( event.phase, event.keyName )
+
+	if "back" == keyName then
+		onButtonEvent{ target = { id = "close_btn" } }
+	end
 
 	if phase == "down" then
 

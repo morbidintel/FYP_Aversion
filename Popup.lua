@@ -107,7 +107,7 @@ function scene:createScene( event )
 	
 	myPauseScreenSheet = nil
 	
-	button.x = screenWidth*0.50
+	button.x = screenWidth*0.75
 	button.y = screenHeight*0.80
 end
 
@@ -115,7 +115,6 @@ end
 -- Called immediately after scene has moved onscreen:
 function scene:enterScene( event )
 	local screenGroup = self.view
-	print( "1: enterScene event" )
 	
 	-- remove previous scene's view
 	--storyboard.purgeScene( "scene4" )
@@ -143,7 +142,6 @@ local screenGroup = self.view
 
 	screenGroup:removeSelf()
 	screenGroup = nil
-	--print( "1: exitScene event" )
 	
 	-- remove touch listener for image
 	--image:removeEventListener( "touch", image )
@@ -158,7 +156,6 @@ end
 
 -- Called prior to the removal of scene's "view" (display group)
 function scene:destroyScene( event )
-	print( "((destroying scene 1's view))" )
 end
 
 ---------------------------------------------------------------------------------

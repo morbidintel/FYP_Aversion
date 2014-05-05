@@ -63,13 +63,13 @@ local function scrollListener( event )
 	-- If the scrollView has reached it's scroll limit
 	if event.limitReached then
 		if "up" == direction then
-			print( "Reached Top Limit" )
+			--	print( "Reached Top Limit" )
 		elseif "down" == direction then
-			print( "Reached Bottom Limit" )
+			--	print( "Reached Bottom Limit" )
 		elseif "left" == direction then
-			print( "Reached Left Limit" )
+			--	print( "Reached Left Limit" )
 		elseif "right" == direction then
-			print( "Reached Right Limit" )
+			--	print( "Reached Right Limit" )
 		end
 	end
 			
@@ -328,7 +328,6 @@ end
 -- Called immediately after scene has moved onscreen:
 function scene:enterScene( event )
 	local screenGroup = self.view
-	print( "1: enterScene event" )
 	
 	storyboard.removeScene( "GameScene" )
 	storyboard.removeScene( "HelpMenu" )
@@ -382,8 +381,6 @@ end
 
 -- Called prior to the removal of scene's "view" (display group)
 function scene:destroyScene( event )
-	
-	print( "((destroying scene 1's view))" )
 end
 
 
@@ -404,6 +401,22 @@ end
 
 
 Runtime:addEventListener("touch", onTouch)
+
+
+function onKeyEvent( event )
+
+	local phase = event.phase
+	local keyName = event.keyName
+
+	print( event.phase, event.keyName )
+
+	if "back" == keyName then
+		onButtonEvent{ target = { id = "close_btn" } }
+	end
+
+end
+
+Runtime:addEventListener("onKey", onKeyEvent)
 ---------------------------------------------------------------------------------
 -- END OF YOUR IMPLEMENTATION
 ---------------------------------------------------------------------------------

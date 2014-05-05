@@ -400,9 +400,7 @@ function enemy:getPositionY()
 end
 
 function enemy:UpdateCannabis( player, map, ii )
---print("HERE - "..player.playerHealth)
 	if self.state == STATE_PATROL then
-		--print("PATROLLING)
 		-- left-right movement
 		if self.xpos < self.originalX + self.patrolRadius and self.direction == DIRECTION_RIGHT then
 			self.xpos = self.xpos + self.patrolSpeed-- * getDeltaTime()
@@ -421,7 +419,6 @@ function enemy:UpdateCannabis( player, map, ii )
 		
 		if math.abs(self.ypos - player.y) <= 32 then -- hardcoded
 			if math.abs(self.xpos - player.x) <= self.aggroRadius then
-				--print("CHASE")
 				if player.x >= math.abs(self.originalX - self.patrolRadius*2) and player.x <= math.abs(self.originalX + self.patrolRadius*2) then
 					self.state = STATE_CHASING
 					-- changin the animation
@@ -437,7 +434,6 @@ function enemy:UpdateCannabis( player, map, ii )
 		end
 		
 	elseif self.state == STATE_CHASING then
-		--print("CHASING")
 		
 		if (player.x - self.xpos) >= 0 then
 			self.direction = DIRECTION_LEFT
@@ -449,7 +445,6 @@ function enemy:UpdateCannabis( player, map, ii )
 		
 		if math.abs(self.ypos - player.y) >= 32 or--then -- hardcoded
 			--[[if]] math.abs(self.xpos - self.originalX) >= self.chaseRadius then
-				--print("BACK TO PATROL")
 				self.state = STATE_PATROL
 				-- changin the animation
 				for i = #allSprites, 1, -1 do
@@ -499,7 +494,6 @@ function enemy:Shoot(inx, iny)
 end
 
 function enemy:UpdateHeroin( player, map, ii )
---print("HERE - "..player.playerHealth)
 	if self.state == STATE_PATROL then
 		-- left-right movement
 		if self.xpos < self.originalX + self.patrolRadius and self.direction == DIRECTION_RIGHT then
@@ -540,7 +534,6 @@ function enemy:UpdateHeroin( player, map, ii )
 			if bullets[i].y <= 0 then	-- out of screen
 				display.remove(bullets[i])
 				table.remove(bullets, i)
-				--print("Bullet Removed")
 				--return
 			end
 		end
@@ -567,7 +560,6 @@ function enemy:Spray(inx, iny, indir, ii)
 	spray.x = inx + indir * 50
 	spray.y = iny - 13
 	spray.xScale = indir
-	--print("FLIP")
 	spray.by = ii		-- by who
 	spray.IsSpray = true
 	physics.addBody( spray, "static", {isSensor = true} )
@@ -594,7 +586,6 @@ function enemy:Boom(inx, iny, ii)
 	boom.x = inx
 	boom.y = iny - 40
 	boom.xScale = boom_dir
-	--print("FLIP")
 	boom.by = ii		-- by who
 	boom.IsBoom = true
 	physics.addBody( boom, "static", {isSensor = true} )
@@ -607,8 +598,6 @@ function enemy:Boom(inx, iny, ii)
 end
 
 function enemy:UpdateInhalant( player, map, ii )
-	--print(pos_x.." and "..pos_y.." id - "..self.id.." state - "..self.state)
-	--print(ii.." state - "..self.state)
 	if self.state == STATE_PATROL then
 		-- left-right movement
 		if self.xpos < self.originalX + self.patrolRadius and self.direction == DIRECTION_RIGHT then
@@ -636,7 +625,6 @@ function enemy:UpdateInhalant( player, map, ii )
 			--b_sprayin = true
 		end
 	elseif self.state == STATE_ATTACKING then
-		--print("ATTACKING")
 		if self.b_sprayin == false then
 			enemy:Spray(self.xpos, self.ypos, self.spray_dir, ii)
 			self.b_sprayin = true
@@ -646,13 +634,10 @@ function enemy:UpdateInhalant( player, map, ii )
 		--if #sprays >= 1 then
 			for i = #sprays, 1, -1 do
 				if sprays[i].by == ii then			-- this (temporarily)
-				--print("IN")
 					if sprays[i].frame == 7 then -- last frame
 						display.remove(sprays[i])
 						self.b_sprayin = false
-						--print("SPRAY REMOVED")
 						self.state = STATE_PATROL
-						--print("CHANGED BACK TO "..self.state)
 						table.remove(sprays, i)
 					end
 				end
@@ -661,16 +646,13 @@ function enemy:UpdateInhalant( player, map, ii )
 		
 		--if self.spray~=nil then
 		--	if self.spray.frame == 7 then -- last frame
-		--		print("spray goin to die here")
 		--		--display.remove(self.spray)
 		--		--spray = nil
 		--		self.b_sprayin = false
-		--		print("SPRAY REMOVED")
 		--		self.state = STATE_PATROL
 		--	end
 		--end
 	elseif self.state == STATE_EXPLODING then
-		--print("BOOMING")
 		if self.b_boomin == false then
 			for i = #allSprites, 1, -1 do
 				if allSprites[i].id == ii then
@@ -706,9 +688,6 @@ function enemy:UpdateInhalant( player, map, ii )
 				if booms[i].frame == 7 then -- last frame
 					display.remove(booms[i])
 					self.b_sprayin = false
-					--print("SPRAY REMOVED")
-					--self.state = STATE_PATROL
-					--print("CHANGED BACK TO "..self.state)
 					table.remove(booms, i)
 				end
 			end
@@ -745,7 +724,7 @@ function enemy:Update( player, map, ii, enemyType )
 	elseif enemyType == 3 then
 		self:UpdateInhalant( player, map, ii )
 	else
-		print("ERROR")
+		print("enemy:Update() : Inavlid Enemy Type")
 	end
 
 --	if not self.sprite then error( self.etype ) end
@@ -768,9 +747,7 @@ end
 
 function enemy:Destroy()
 	if #bullets > 0 then
-	print("IN "..#bullets)
 		for b = #bullets,1,-1 do
-		print(b) 
 			display.remove(bullets[b])
 			--bullets[b]:removeSelf()
 			table.remove(bullets, b)
@@ -803,14 +780,9 @@ end
  function onCollision(event)
      if ( event.phase == "began" ) then
 
-        --print( "began: " .. event.object1.myName .. " and " .. event.object2.myName )
-		--if event.other.IsGround then
-		--	print("HIT")
-		--end
 
     elseif ( event.phase == "ended" ) then
 
-        --print( "ended: " .. event.object1.myName .. " and " .. event.object2.myName )
 
     end
  end
