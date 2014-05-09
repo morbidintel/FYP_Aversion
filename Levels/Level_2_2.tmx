@@ -12,7 +12,7 @@
  <tileset firstgid="67" name="plank" tilewidth="32" tileheight="32">
   <image source="plank.png" width="96" height="96"/>
  </tileset>
- <layer name="Tile Layer 1" width="60" height="16">
+ <layer name="Tile Layer" width="60" height="16">
   <data encoding="base64" compression="zlib">
    eJztkksLwjAQhHNTjypqfb9fV8WTXkQUrf///zjBBrahaUKwWQ8Z+MAmQ6fjrhDlulvuf6EbYzZHZuwbLpsjM/YNl82RGfuGy+bIjH2/egbI1sXV9wVS8A6QT0X71kAdNAxe3/t/2me6U03QAm2D1/f+QX5fCfo+q/My2TypBbpPVc1X7a4tvwMmJV1cPa6qar6umoIdeZbdxiLfT/f4SL63C3ogAX0wAEMwyjITR48695nBHhzI8xGcwMXgKfpuF8n/bAbmYAGWYAXWYAO2Wa46N3nouc8M9NnJvmeR70s9Rd/9AfbRHQc=
   </data>
@@ -45,7 +45,7 @@
   <object name="Heroin" type="HeroinSpawn" x="527" y="402">
    <properties>
     <property name="props:aggroRadius" value="96"/>
-    <property name="props:attackSpeed" value="2"/>
+    <property name="props:attackSpeed" value="1"/>
     <property name="props:bulletSpeed" value="2"/>
     <property name="props:enemyType" value="2"/>
     <property name="props:patrolDirection" value="1"/>
@@ -57,7 +57,7 @@
   <object name="Heroin" type="HeroinSpawn" x="781" y="402">
    <properties>
     <property name="props:aggroRadius" value="96"/>
-    <property name="props:attackSpeed" value="2"/>
+    <property name="props:attackSpeed" value="1"/>
     <property name="props:bulletSpeed" value="2"/>
     <property name="props:enemyType" value="2"/>
     <property name="props:patrolDirection" value="1"/>

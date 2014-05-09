@@ -9,7 +9,7 @@
  <tileset firstgid="36" name="bricks tileset" tilewidth="32" tileheight="32">
   <image source="bricks tileset.png" width="224" height="224"/>
  </tileset>
- <layer name="Tile Layer 1" width="35" height="15">
+ <layer name="Tile Layer" width="35" height="15">
   <data encoding="base64" compression="zlib">
    eJxjYBgFo2AU4APuQOwBxJ4D7RA6AxUgVgViDSDWBGK1AXSLERAbA7EFFJsQoYcRiJmAmBmIBcm01wGIHYHYiUz92AA3Fc2iFAgNtAOQwGByCyiOYOleiwZsUvISKFz0gdgAiA1pwNYl0S0APIEMKg==
   </data>

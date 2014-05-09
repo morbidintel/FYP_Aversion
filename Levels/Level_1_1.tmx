@@ -9,7 +9,7 @@
  <tileset firstgid="50" name="spikes 32px" tilewidth="32" tileheight="32">
   <image source="spikes 32px.png" width="64" height="96"/>
  </tileset>
- <layer name="Tile Layer 1" width="30" height="20">
+ <layer name="Tile Layer" width="30" height="20">
   <data encoding="base64" compression="zlib">
    eJztkEsKgDAMBatg/eAPpEv1Dt7/cL6u7CKQNARXGRiYRaHtC8FxHCknvOD9871PoWNDAyPsYce0JQNc4ApnpjXkf7Xhe7+mNeR/jcX7Na1hgztM8FA2h8WmVHNYbEo1h8WmVEt3jIIzNV2z42S49QuvHQjR
   </data>

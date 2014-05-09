@@ -71,15 +71,15 @@ local function getDeltaTime()
    return dt
 end
 
-local myCannabisOptions = {
+local CannabisOptions = {
 	width = 48,
 	height = 48,
 	numFrames = 35,
 	sheetContentWidth = 1680,
 	sheetContentHeight = 48
 }
-local myCannabisSheet = graphics.newImageSheet( "Images/Characters/Cannabis/Cannabis_Sprite.png", myCannabisOptions )
-local myCannabisSequenceData = {
+local CannabisSheet = graphics.newImageSheet( "Images/Characters/Cannabis/Cannabis_Sprite.png", CannabisOptions )
+local CannabisSequenceData = {
 		--{ name = "1", frames={ 1,2,3,4,5,6,7 }, time = 1000 },
 		{ name = "1", frames={ 1,2,3,4 }, time = 1000 },
 		{ name = "2", frames={ 5,6,7 }, time = 1000 },
@@ -96,42 +96,40 @@ local myCannabisSequenceData = {
 		{ name = "9", frames={ 29,30,31,32 }, time = 1000 },
 		{ name = "10", frames={ 33,34,35 }, time = 1000 }
 }
-function enemy.newCannabis( eindex, etype, x, y, patroldirection, patrolspeed, patrolrad, aggrorad, chasespeed, chaserad, inMap )
+function enemy.newCannabis( index, type, x, y, patrolDirection, patrolSpeed, patrolRadius, aggroRadius, chaseSpeed, chaseRad, map )
 
-	theMap = inMap
-	local layer = inMap.layer["Enemy"]
+	theMap = map
+	local layer = map.layer["Enemy"]
 	
-	local id = eindex
-	local etype = tonumber(etype)
+	local id = index
+	local type = tonumber(type)
 	local originalX = x
 	local originalY = y
 	local xpos = x
 	local ypos = y
 	local state = STATE_PATROL
-	local direction = patroldirection 
-	local patrolSpeed = patrolspeed
-	local patrolRadius = patrolrad
-	local aggroRadius = aggrorad
-	local chaseSpeed = chasespeed
-	local chaseRadius = chaserad
+	local direction = patrolDirection 
+	local patrolSpeed = patrolSpeed
+	local patrolRadius = patrolRadius
+	local aggroRadius = aggroRadius
+	local chaseSpeed = chaseSpeed
+	local chaseRadius = chaseRad
 	
 	local isDead = false
 	
 	-- sprite
 	
 	--local 
-	sprite = display.newSprite( layer, myCannabisSheet, myCannabisSequenceData )
+	sprite = display.newSprite( layer, CannabisSheet, CannabisSequenceData )
 	sprite.x = x
 	sprite.y = y
-	sprite.etype = etype
+	sprite.type = type
 	--sprite:setSequence(currentFrame)
 	sprite:play()
-	sprite.id = eindex
+	sprite.id = index
 	sprite.IsCannabis = true
 	sprite.isDead = false
---	physics.addBody(sprite,{isSensor = true})
 	sprite.isFixedRotation = true
-	sprite.bodyType = "dynamic"
 	
 	table.insert(allSprites, sprite)
 	
@@ -142,7 +140,7 @@ function enemy.newCannabis( eindex, etype, x, y, patroldirection, patrolspeed, p
 		xpos = xpos,
 		ypos = ypos,
 		id = id,
-		etype = etype,
+		type = type,
 		state = state,
 		direction = direction,
 		patrolSpeed = patrolSpeed,
@@ -163,60 +161,57 @@ function enemy.newCannabis( eindex, etype, x, y, patroldirection, patrolspeed, p
 	return setmetatable( newenemy, enemy_mt )
 end
 
-local myHeroinOptions = {
+local HeroinOptions = {
 	width = 32,
 	height = 96,
 	numFrames = 35,
 	sheetContentWidth =1120,
 	sheetContentHeight = 96
 }
-local myHeroinSheet = graphics.newImageSheet( "Images/Characters/Heroin/Heroin_Sprite.png", myHeroinOptions )
-local myHeroinSequenceData = {
+local HeroinSheet = graphics.newImageSheet( "Images/Characters/Heroin/Heroin_Sprite.png", HeroinOptions )
+local HeroinSequenceData = {
 	{ name = "1", frames={ 1,2,3,4,5,6,7 }, time = 1050 },
 	{ name = "2", frames={ 8,9,10,11,12,13,14 }, time = 1050 },
 	{ name = "3", frames={ 15,16,17,18,19,20,21 }, time = 1050 },
 	{ name = "4", frames={ 22,23,24,25,26,27,28 }, time = 1050 },
 	{ name = "5", frames={ 29,30,31,32,33,34,35 }, time = 1050 }
 }
-function enemy.newHeroin( eindex, etype, x, y, patroldirection, patrolspeed, patrolrad, aggrorad, attackspeed, bulletspeed, inMap )
+function enemy.newHeroin(index, type, x, y, patrolDirection, patrolSpeed, patrolRadius, aggroRadius, attackSpeed, bulletSpeed, map)
 
-	theMap = inMap
-	local layer = inMap.layer["Enemy"]
+	theMap = map
+	local layer = map.layer["Enemy"]
 	
-	local id = eindex
-	local etype = etype
+	local id = index
+	local type = type
 	local originalX = x
 	local originalY = y
 	local xpos = x
 	local ypos = y
 	local state = STATE_PATROL
-	local direction = patroldirection
-	local patrolSpeed = patrolspeed
-	local patrolRadius = patrolrad
-	local aggroRadius = aggrorad
-	local attSpeed = attackspeed
-	local att_cd = attackspeed
+	local direction = patrolDirection
+	local patrolSpeed = patrolSpeed
+	local patrolRadius = patrolRadius
+	local aggroRadius = aggroRadius
+	local att_cd = attackSpeed
 	local last_att = 0
-	BULLET_DIRECTION_UP = bulletspeed
+	BULLET_DIRECTION_UP = bulletSpeed
 	
 	local isDead = false
 	
 	-- sprite
 	
 	--local 
-	sprite = display.newSprite( layer, myHeroinSheet, myHeroinSequenceData )
+	sprite = display.newSprite( layer, HeroinSheet, HeroinSequenceData )
 	sprite.x = x
 	sprite.y = y
-	sprite.etype = etype
+	sprite.type = type
 	--sprite:setSequence(currentFrame)
 	sprite:play()
-	sprite.id = eindex
+	sprite.id = index
 	sprite.IsHeroin = true
 	sprite.CanShoot = true -- new; later
 	sprite.isDead = false
-	physics.addBody(sprite,{isSensor = true})
 	sprite.isFixedRotation = true
-	sprite.bodyType = "dynamic"
 
 	table.insert(allSprites, sprite)
 	
@@ -232,14 +227,13 @@ function enemy.newHeroin( eindex, etype, x, y, patroldirection, patrolspeed, pat
 		xpos = xpos,
 		ypos = ypos,
 		id = id,
-		etype = etype,
+		type = type,
 		state = state,
 		direction = direction,
 		patrolSpeed = patrolSpeed,
 		patrolRadius = patrolRadius,
 		aggroRadius = aggroRadius,
-		attSpeed = attackspeed,
-		att_cd = attackspeed,--2
+		att_cd = attackSpeed,--2
 		last_att = 0,
 		
 		isDead = isDead,
@@ -249,22 +243,22 @@ function enemy.newHeroin( eindex, etype, x, y, patroldirection, patrolspeed, pat
 
 		sprite = sprite
 		
-		--sprite = display.newSprite( myHeroinSheet, myHeroinSequenceData )
+		--sprite = display.newSprite( HeroinSheet, HeroinSequenceData )
 		
 	}
 	
 	return setmetatable( newenemy, enemy_mt )
 end
 
-local myInhalantOptions = {
+local InhalantOptions = {
 	width = 48,
 	height = 48,
 	numFrames = 55,
 	sheetContentWidth = 2640,
 	sheetContentHeight = 48
 }
-local myInhalantSheet = graphics.newImageSheet( "Images/Characters/Inhalant/Inhalant_Sprite.png", myInhalantOptions )
-local myInhalantSequenceData = {
+local InhalantSheet = graphics.newImageSheet( "Images/Characters/Inhalant/Inhalant_Sprite.png", InhalantOptions )
+local InhalantSequenceData = {
 	{ name = "1", frames={ 1,2,3,4,5 }, time = 500 },
 	{ name = "2", frames={ 12,13,14,15,16 }, time = 500 },
 	{ name = "3", frames={ 23,24,25,26,27 }, time = 500 },
@@ -276,25 +270,23 @@ local myInhalantSequenceData = {
 	{ name = "9", frames={ 39,40,39,40,41,42,41,42,43,44 }, time = 750 },
 	{ name = "10", frames={ 50,51,50,51,52,53,52,53,54,55 }, time = 750 },
 }
-function enemy.newInhalant( eindex, etype, x, y, patroldirection, patrolspeed, patrolrad, aggrorad, attackspeed, inMap )
+function enemy.newInhalant( index, type, x, y, patrolDirection, patrolSpeed, patrolRadius, aggroRadius, attackSpeed, map )
 
-	theMap = inMap
-	local layer = inMap.layer["Enemy"]
+	local layer = map.layer["Enemy"]
 
-	local id = eindex
-	local etype = tonumber(etype)
+	local id = index
+	local type = tonumber(type)
 	local originalX = x
 	local originalY = y
 	local xpos = x
 	local ypos = y
 	local state = STATE_PATROL
-	local direction = patroldirection
-	local patrolSpeed = patrolspeed
-	local patrolRadius = patrolrad
-	local aggroRadius = aggrorad
-	local attSpeed = attackspeed
+	local direction = patrolDirection
+	local patrolSpeed = patrolSpeed
+	local patrolRadius = patrolRadius
+	local aggroRadius = aggroRadius
 	local last_att = 0
-	local spray_dir = patroldirection
+	local spray_dir = patrolDirection
 	local b_sprayin = false
 	local b_boomin = false
 	
@@ -303,18 +295,16 @@ function enemy.newInhalant( eindex, etype, x, y, patroldirection, patrolspeed, p
 	-- sprite
 	
 	--local 
-	sprite = display.newSprite( layer, myInhalantSheet, myInhalantSequenceData )
+	sprite = display.newSprite( layer, InhalantSheet, InhalantSequenceData )
 	sprite.x = x
 	sprite.y = y
-	sprite.etype = etype
+	sprite.type = type
 	--sprite:setSequence(currentFrame)
 	sprite:play()
-	sprite.id = eindex
+	sprite.id = index
 	sprite.IsInhalant = true
 	sprite.isDead = false
-	physics.addBody(sprite,{isSensor = true})
 	sprite.isFixedRotation = true
-	sprite.bodyType = "dynamic"
 	
 	table.insert(allSprites, sprite)
 	
@@ -325,15 +315,14 @@ function enemy.newInhalant( eindex, etype, x, y, patroldirection, patrolspeed, p
 		xpos = xpos,
 		ypos = ypos,
 		id = id,
-		etype = etype,
+		type = type,
 		state = state,
 		direction = direction,
 		patrolSpeed = patrolSpeed,
 		patrolRadius = patrolRadius,
 		aggroRadius = aggroRadius,
-		attSpeed = attackspeed,
 		last_att = 0,
-		spray_dir = patroldirection,
+		spray_dir = patrolDirection,
 		b_sprayin = false,
 		b_boomin = false,
 		
@@ -344,11 +333,88 @@ function enemy.newInhalant( eindex, etype, x, y, patroldirection, patrolspeed, p
 
 		sprite = sprite
 		
-		--sprite = display.newSprite( myHeroinSheet, myHeroinSequenceData )
+		--sprite = display.newSprite( HeroinSheet, HeroinSequenceData )
 		
 	}
 	
 	return setmetatable( newenemy, enemy_mt )
+end
+
+local IceOptions =
+{
+	width = 48,
+	height = 48,
+	numFrames = 10,
+	sheetContentWidth = 480,
+	sheetContentHeight = 48
+}
+local IceSheet = graphics.newImageSheet("Images/Characters/Ice/Ice_Sprite.png",IceOptions )
+local IceSequenceData =
+{
+	{ name = "1", frames={ 1,2 }, time = 500 },
+	{ name = "2", frames={ 3,4 }, time = 500 },
+	{ name = "3", frames={ 5,6 }, time = 500 },
+	{ name = "4", frames={ 7,8 }, time = 500 },
+	{ name = "5", frames={ 9,10 }, time = 500 }
+}
+function enemy.newIce(index, type, x, y, swingRadius, swingSpeed, map)
+
+	--	local iceSprite = display.newSprite( IceSheet, sequenceData )
+	--	iceSprite.anchorX, iceSprite.anchorY = 0.5, 0.5
+	--	iceSprite.x, iceSprite.y = object.x, object.y
+	--	iceSprite:setSequence(currentFrame)
+	--	iceSprite:play()
+	--	iceSprite.alpha = 1
+	--	iceSprite.id = index
+
+	--	iceSprite.isDead = false
+
+	--	physics.addBody(iceSprite,{isSensor = true, radius = 18})
+
+	--	sprite.isFixedRotation = true
+
+	--	local temp = enemy.new( object.x, object.y, 
+	--							tonumber(object.props.enemyType), 
+	--							tonumber(object.props.patrolRadius), 
+	--							tonumber(object.props.aggroRadius), index, 
+	--							tonumber(object.props.patrolSpeed))	
+	--	temp.id = index
+	--	index = index + 1
+	--	temp.isFixedRotation = true
+	--	table.insert(enemyList, temp)
+
+	theMap = map
+	local layer = map.layer["Enemy"]
+
+	sprite = display.newSprite( layer, IceSheet, IceSequenceData )
+	sprite.x, sprite.y = x,y
+	sprite.anchorX, sprite.anchorY = 0.5, 0.5
+	sprite.type = type
+	sprite.id = index
+	sprite.IsIce = true
+	sprite.isDead = false
+	sprite.isFixedRotation = true
+	sprite:play()
+
+	table.insert(allSprites, sprite)
+
+	local ice = 
+	{
+		id = index,
+		type = tonumber(type),
+		xpos = x,
+		ypos = y,
+		originalX = x,
+		originalY = x,
+		state = STATE_PATROL,
+		swingRadius = swingRadius,
+		swingSpeed = swingSpeed,
+
+		sprite = sprite
+	}
+
+	return setmetatable( ice, enemy_mt )
+
 end
 
 function enemy:isChasing()
@@ -360,7 +426,7 @@ function enemy:isChasing()
 end
 
 function enemy:getType()
-	return self.etype
+	return self.type
 end
 
 function enemy:getId()
@@ -469,13 +535,13 @@ local BulletOptions = {
 	sheetContentWidth = 96,
 	sheetContentHeight = 32
 }
-local myBulletSheet = graphics.newImageSheet( "Images/Characters/Heroin/HeroinBullet_Sprite.png", BulletOptions )
+local BulletSheet = graphics.newImageSheet( "Images/Characters/Heroin/HeroinBullet_Sprite.png", BulletOptions )
 local BulletSequenceData = {
 	{ name = "1", frames={ 1,2,3,4,5,6 }, time = 250 }
 }
 function enemy:Shoot(inx, iny)
 	--local bullet = display.newCircle(pos_x, pos_y, 5)
-	local bullet = display.newSprite( theMap.layer["Enemy"], myBulletSheet, BulletSequenceData )
+	local bullet = display.newSprite( theMap.layer["Enemy"], BulletSheet, BulletSequenceData )
 	bullet.x = inx
 	bullet.y = iny - 10
 	bullet:setSequence(1)
@@ -513,11 +579,11 @@ function enemy:UpdateHeroin( player, map, ii )
 		
 		-- shoot every x second
 		local t = system.getTimer()/1000
-		if  t - self.last_att >= self.att_cd then
+		if  t - self.last_att >= 3--[[self.att_cd]] then
 			self.last_att = t
 			self.state = STATE_ATTACKING
 		end
-	elseif self.state == STATE_ATTACKING then
+	elseif self.state == STATE_ATTACKING  and not self.isDead then
 		enemy:Shoot(self.xpos, self.ypos)
 		self.state = STATE_PATROL
 	else
@@ -541,6 +607,10 @@ function enemy:UpdateHeroin( player, map, ii )
 	-- end of bullet loop
 end
 
+function enemy:UpdateIce( player, map, ii )
+
+end
+
 local SprayOptions = {
 	width = 64,
 	height = 32,
@@ -548,15 +618,15 @@ local SprayOptions = {
 	sheetContentWidth =448,
 	sheetContentHeight = 32
 }
-local mySpraySheet = graphics.newImageSheet( "Images/Characters/Inhalant/InhalantAttack_Sprite.png", SprayOptions )
+local SpraySheet = graphics.newImageSheet( "Images/Characters/Inhalant/InhalantAttack_Sprite.png", SprayOptions )
 local SpraySequenceData = {
 	{ name = "1", frames={ 1 }, time = 1000 },
 	{ name = "2", frames={ 1,2,3,4,5,6,7 }, loopCount = 1, time = 1500 }
 	--{ name = "2", start = 2, count = 6, loopCount = 1, time = 1000 },
 }
-function enemy:Spray(inx, iny, indir, ii)
+function enemy:Spray(inx, iny, indir, ii, map)
 	local spray
-	spray = display.newSprite( theMap.layer["Enemy"], mySpraySheet, SpraySequenceData )
+	spray = display.newSprite( map.layer["Enemy"], SpraySheet, SpraySequenceData )
 	spray.x = inx + indir * 50
 	spray.y = iny - 13
 	spray.xScale = indir
@@ -576,13 +646,13 @@ local BoomOptions = {
 	sheetContentWidth =1024,
 	sheetContentHeight = 128
 }
-local myBoomSheet = graphics.newImageSheet( "Images/Characters/Inhalant/InhalantExplode_Sprite.png", BoomOptions )
+local BoomSheet = graphics.newImageSheet( "Images/Characters/Inhalant/InhalantExplode_Sprite.png", BoomOptions )
 local BoomSequenceData = {
 	{ name = "1", frames={ 1,2,3,4,5,6,7 }, loopCount = 1, time = 2000 }
 }
 function enemy:Boom(inx, iny, ii)
 	local boom
-	boom = display.newSprite( theMap.layer["Enemy"], myBoomSheet, BoomSequenceData )
+	boom = display.newSprite( theMap.layer["Enemy"], BoomSheet, BoomSequenceData )
 	boom.x = inx
 	boom.y = iny - 40
 	boom.xScale = boom_dir
@@ -619,14 +689,13 @@ function enemy:UpdateInhalant( player, map, ii )
 		
 		-- shoot every x second
 		local t = system.getTimer()/1000
-		if  t - self.last_att >= 3 then--att_cd then
-			self.last_att = t
+		if  t - self.last_att >= 3 then--att_cd thenB
 			self.state = STATE_ATTACKING
 			--b_sprayin = true
 		end
 	elseif self.state == STATE_ATTACKING then
 		if self.b_sprayin == false then
-			enemy:Spray(self.xpos, self.ypos, self.spray_dir, ii)
+			enemy:Spray(self.xpos, self.ypos, self.spray_dir, ii, map)
 			self.b_sprayin = true
 		end
 		
@@ -723,11 +792,13 @@ function enemy:Update( player, map, ii, enemyType )
 		self:UpdateHeroin( player, map, ii )
 	elseif enemyType == 3 then
 		self:UpdateInhalant( player, map, ii )
+	elseif enemyType == 4 then
+		self:UpdateIce( player, map, ii )
 	else
 		print("enemy:Update() : Inavlid Enemy Type")
 	end
 
---	if not self.sprite then error( self.etype ) end
+--	if not self.sprite then error( self.type ) end
 	self.sprite.x = self.xpos
 	self.sprite.y = self.ypos
 end
@@ -735,7 +806,7 @@ end
 function enemy:changeAnimation( s )
 	for i = #allSprites, 1, -1 do
 		--if allSprites[i].id == ii then
-			if allSprites[i].etype == 1 then
+			if allSprites[i].type == 1 then
 				allSprites[i]:setSequence( (playerMaxHealth - s) * 2 - 1 )
 			else
 				allSprites[i]:setSequence(  playerMaxHealth - s  )
