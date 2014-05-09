@@ -12,7 +12,7 @@
  <tileset firstgid="67" name="plank" tilewidth="32" tileheight="32">
   <image source="plank.png" width="96" height="96"/>
  </tileset>
- <layer name="Tile Layer 1" width="40" height="15">
+ <layer name="Tile Layer" width="40" height="15">
   <data encoding="base64" compression="zlib">
    eJzt0zcPwjAQhuFjoi7Uhd6LqAslgGgCUf7//+FFMCQhxJEcysBJz5Sz/ckXi1hrL+61U3xXlWp/3fX/fHrrfz3fQXP/o+Z6Vb4Tzhoub84X8ME78327/vmslUUOeRRQRgVV1Bz6P52vjgaaWGCDLnroO/Tb338QIYQRQRQxH/MNMMQIaxgYY4KpqN9/HAkkkUIaGQ/n2udWREmeZzZ7ZJpjKfc7vOW83ePW4xn2c5z+C3uZ59ZCGx15npm5z3hkdJvvq7ULlzOcyjy3lVhn9qpvLfd7NPdeAUBpG5k=
   </data>

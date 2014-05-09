@@ -12,7 +12,7 @@
  <tileset firstgid="56" name="Streetlight tileset" tilewidth="32" tileheight="32">
   <image source="Streetlight tileset.png" width="224" height="96"/>
  </tileset>
- <layer name="Tile Layer 1" width="75" height="15">
+ <layer name="Tile Layer" width="75" height="15">
   <data encoding="base64" compression="zlib">
    eJztmMsOwiAQRdHGqo3PqEs16j80vhdd2f//IS8xRMQBB1tSq97kJEQRmOlcCgoRVh3QBwPQY7Rl/y5IAq/rEzUEUzADE0Zb9h+BcRWLrZkaoAmiqhdSA/2yB+dgDTZgRbSXINX6192DMt6FuMVVpii//T1Ii/Lbt3twC3Yae3Bh/I6qIZcHQ9V31coYfaga+kUPcnJF1ZCvB1Vu26AlyslziDFdyrQ5UwNX7ej54/hZ5VY//xfd62xjyrzF4p7D2BKDrzLxeL/R5/GNyVWjKrfq/P/qvKH2VvkMDuAITuDMGJO6l5XxDsrF8/1Gn199zpErV0X8wtkndFH3Mttzkesya9DWjixxvBNT7vjO5hdODl3jFpXPfwYJEYfZNt9/Ps9ByeYXam7TL765ugKLFRLe
   </data>
@@ -151,7 +151,7 @@
   </object>
   <object name="swing" type="PendulumSpawn" x="336" y="189">
    <properties>
-    <property name="props:radius" value="60"/>
+    <property name="props:radius" value="80"/>
    </properties>
    <ellipse/>
   </object>

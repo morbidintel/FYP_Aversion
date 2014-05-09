@@ -12,7 +12,7 @@
  <tileset firstgid="70" name="spikes 32px" tilewidth="32" tileheight="32">
   <image source="spikes 32px.png" width="64" height="96"/>
  </tileset>
- <layer name="Tile Layer 1" width="80" height="16">
+ <layer name="Tile Layer" width="80" height="16">
   <data encoding="base64" compression="zlib">
    eJztlmlOAzEMhecSBco27Ps+lNIFMWL5w/0PxIuUCMvEdqYhCEZ90qdGjRt7LL9Mq0rXk7H/bOxb0s63zrZqSzljEaXkTY1d9k9Xa+y/ZNTh1Pf+vYI3hfeCtfShf6W17F+ecvrXgg+D3PtFyvtXlNM/6275ifvFyltCA7ACVsG2EZvTv76qBjvgGJwYsa2yV8J7/0Gn4AzcgjsjVvPgot6j878GhmAdbIBNsOUZdlhLPqJn8piBz695MBbTgHswAnPjWUsozP8u2AP7bH0ADjusNR+5mCMhpvY5NQ/GYmrlzN9QmP9zcAEu2foKXIObxLXmIy3G1WHNkIuZsN82CXkt0bmW/ptI/qDz/wDG4NHXOQUz/znusJZ6QM/kMY3f03rQ+Bxz9l2uf+lc0/uM3jWSP6h/XQ0l/eueXfJabLa4XK9mLKbL+1cSzU37QWuV6qP+dXNX0r8jJSY2W7HnnFbf54+eSecnvBO1dxrPTftBz5Xqo/M/qb78GzzpPoOvU9dSDz4BFFdH1Q==
   </data>
@@ -43,7 +43,7 @@
   <object name="Heroin" type="HeroinSpawn" x="864" y="435">
    <properties>
     <property name="props:aggroRadius" value="96"/>
-    <property name="props:attackSpeed" value="2"/>
+    <property name="props:attackSpeed" value="1"/>
     <property name="props:bulletSpeed" value="2"/>
     <property name="props:enemyType" value="2"/>
     <property name="props:patrolDirection" value="-1"/>
@@ -92,13 +92,13 @@
   </object>
   <object name="swing" type="PendulumSpawn" x="271" y="126">
    <properties>
-    <property name="props:radius" value="60"/>
+    <property name="props:radius" value="80"/>
    </properties>
    <ellipse/>
   </object>
   <object name="swing" type="PendulumSpawn" x="528" y="125">
    <properties>
-    <property name="props:radius" value="60"/>
+    <property name="props:radius" value="80"/>
    </properties>
    <ellipse/>
   </object>
@@ -181,7 +181,6 @@
   <object name="Inhalant" type="InhalantSpawn" x="1952" y="264">
    <properties>
     <property name="props:aggroRadius" value="64"/>
-    <property name="props:attackSpeed" value="2"/>
     <property name="props:enemyType" value="3"/>
     <property name="props:patrolDirection" value="-1"/>
     <property name="props:patrolRadius" value="32"/>

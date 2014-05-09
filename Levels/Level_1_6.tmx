@@ -12,7 +12,7 @@
  <tileset firstgid="56" name="Streetlight tileset" tilewidth="32" tileheight="32">
   <image source="Streetlight tileset.png" width="224" height="96"/>
  </tileset>
- <layer name="Tile Layer 1" width="60" height="15">
+ <layer name="Tile Layer" width="60" height="15">
   <data encoding="base64" compression="zlib">
    eJztlc0KglAQRi0JS6LsAVK0lPIJ7Hfhzvd/oY4LwUXClGM20YEDH7j57jDe6zg6rDHAjTBbZ4JTdIXZOnNcoC/MY6E1cyv7rDVzrX3eYohRzz5daM3c8j6/M+Nf3Oc9ppgN2mhYvmHmf2zT980r8IRnvOAVb3hXafc69f2W4A7jJ/mAR8w7vtdZejeWmsUNUI1d4MNIz9v8Qx7OWtka0vM27+wKl638APR2Cpk=
   </data>
@@ -39,7 +39,7 @@
   </object>
   <object name="swing" type="PendulumSpawn" x="1200" y="156">
    <properties>
-    <property name="props:radius" value="60"/>
+    <property name="props:radius" value="80"/>
    </properties>
    <ellipse/>
   </object>

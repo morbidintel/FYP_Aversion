@@ -9,7 +9,7 @@
  <tileset firstgid="50" name="spikes 32px" tilewidth="32" tileheight="32">
   <image source="spikes 32px.png" width="64" height="96"/>
  </tileset>
- <layer name="Tile Layer 1" width="36" height="15">
+ <layer name="Tile Layer" width="36" height="15">
   <data encoding="base64" compression="zlib">
    eJxjYMAP+IFYAIgFCaijF2AEYiYgZh5oh0ABBxBzAjHXQDsECkbjCz8YjS/8gFbxBTOXHYhZgZgNyiYEaBVfoHAXAWJRIBZGYhOjj5L4kgViOSCWJ1M/OjBCwvQA1Hb/QANk/+BiDzeAnMfNkDA9ymoApPcEug==
   </data>
@@ -18,7 +18,7 @@
   <object name="Heroin" type="HeroinSpawn" x="624" y="338">
    <properties>
     <property name="props:aggroRadius" value="96"/>
-    <property name="props:attackSpeed" value="2"/>
+    <property name="props:attackSpeed" value="1"/>
     <property name="props:bulletSpeed" value="2"/>
     <property name="props:enemyType" value="2"/>
     <property name="props:patrolDirection" value="1"/>

@@ -57,13 +57,14 @@ if (M.levelData == nil) then
     end
 	
 	M.levelData[1][1].locked = false
-	M.saveData() -- Saves the data	
-end
+	M.saveData() -- Saves the data
 
-for stageIndex = 3, numOfStages do
-	for levelIndex = 1, numOfLevels do
-		M.levelData[stageIndex][levelIndex].locked = true
+	for stageIndex = 3, numOfStages do
+		for levelIndex = 1, numOfLevels do
+			M.levelData[stageIndex][levelIndex].locked = true
+		end
 	end
+
 end
 
 M.saveData()

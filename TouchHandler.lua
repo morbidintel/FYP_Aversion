@@ -1,17 +1,23 @@
 require("functions")
 
+nilTouch = const_table{ id, name, phase, target, time, x, xStart, y, yStart }
+
 local touchHandler =
 {
 	beganOn = "",			-- to check where the touch began on
 	isMovingMap = false,	-- to check whether the player is looking around the map
 	isZoomingMap = false,	-- to check whether the player is zooming in/out the map
+
 	numTouches = 0,			-- to check for multitouches
 
 	touches = {},			-- table of the touch events
 --	activeTouch = {},		-- METATABLE VALUE, current touch that is moving
 --	lastActiveTouch = {},	-- METATABLE VALUE, last touch that has moved, must be different from activeTouch
+--	lastEndedTouch = {},	-- METATABLE VALUE, last touch that has ended
 
 	prevZoomDist = 0,		-- the previous zoom distance
+
+	bMoveMapFast = false,	-- for looking around the map super fast, for debug only
 }
 
 ----    Table functions    ----
@@ -77,8 +83,10 @@ function touchHandler:removeTouch(t, found)
 		table.remove(self.touches, found)
 		self.numTouches = #self.touches
 
-		if self.compareTouch(self.activeTouch,t) then self.activeTouch = nil end
-		if self.compareTouch(self.lastActiveTouch,t) then self.lastActiveTouch = nil end
+		if self.compareTouch(self.activeTouch,t) then self.activeTouch = nilTouch end
+		if self.compareTouch(self.lastActiveTouch,t) then self.lastActiveTouch = nilTouch end
+
+		self.lastEndedTouch = t
 
 	end
 
@@ -128,11 +136,11 @@ end
 
 ----    Metatable    ----
 
-local mt = { activeTouch, lastActiveTouch }
+local mt = { activeTouch = nilTouch, lastActiveTouch = nilTouch, lastEndedTouch = nilTouch }
 
 function mt:__index(key)
 
-	if key == "activeTouch" or key == "lastActiveTouch" then
+	if key == "activeTouch" or key == "lastActiveTouch" or key == "lastEndedTouch" then
 		return mt[key]
 	end
 
@@ -147,7 +155,7 @@ function mt:__newindex(key, value)
 		if value == nil then
 			-- removing activeTouch, push lastActive to active
 			mt.activeTouch = mt.lastActiveTouch
-			mt.lastActiveTouch = nil
+			mt.lastActiveTouch = nilTouch
 			return
 		elseif not touchHandler.compareTouch(value, mt.activeTouch) then
 			-- incoming touch is from different finger
@@ -162,6 +170,10 @@ function mt:__newindex(key, value)
 	elseif key == "lastActiveTouch" then
 
 		mt.lastActiveTouch = value
+
+	elseif key == "lastEndedTouch" then
+
+		mt.lastEndedTouch = value
 
 	else
 

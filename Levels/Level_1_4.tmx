@@ -12,7 +12,7 @@
  <tileset firstgid="56" name="Streetlight tileset" tilewidth="32" tileheight="32">
   <image source="Streetlight tileset.png" width="224" height="96"/>
  </tileset>
- <layer name="Tile Layer 1" width="45" height="15">
+ <layer name="Tile Layer" width="45" height="15">
   <data encoding="base64" compression="zlib">
    eJztlcsKwjAQRUfFJ1YFcaniL7gQKW0XXWn//4N6BwMNg2nLpIQscuDALNL2Qm4aokQi4cMMruAaLs28EGveMIefsNGcbGAGD3Bv5p1jbR0q1ABPh//4hgoFrvAG757vsTNzp+bUdYpn2akYsDNzp7bUdYpn7tTLMgZkZu7+BZ7hycwPmmZPJdqu2JmP9MsZO5oz2MAClrCaNs4oNJn7/o/yHA/dExo0mfueked47D3h+/0WbwgJwg==
   </data>

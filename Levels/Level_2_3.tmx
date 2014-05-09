@@ -12,7 +12,7 @@
  <tileset firstgid="67" name="plank" tilewidth="32" tileheight="32">
   <image source="plank.png" width="96" height="96"/>
  </tileset>
- <layer name="Tile Layer 1" width="55" height="16">
+ <layer name="Tile Layer" width="55" height="16">
   <data encoding="base64" compression="zlib">
    eJztk9cKwkAQRfcn7L33Dj6IPgRRLP//Px4JgRh2J9kkECNeOLDZMncGbpRydVGfOitZwftx7koeNvVt/f+zxasdxSMvs90M+3mf7Q4PeGrO8j6bpF+e7SqcmXIcR8Fe376OQBreXl516DIcV8FeJd+0vE8hJJWp1zDfNLz/+h4VoAglaGbcS9pqQRs6MM62FaMcy29PE5jCDLYJe/BnoAwVqEIN6tAQ9nWZkepFqbGDPRzgmHA2fwa60IM+DIT1EEZKn5mo9Uw1vPem+jb/oz8Dc1jAElawFtYb5WbmBTmuJgU=
   </data>
@@ -21,7 +21,6 @@
   <object name="Inhalant" type="InhalantSpawn" x="1568" y="392">
    <properties>
     <property name="props:aggroRadius" value="64"/>
-    <property name="props:attackSpeed" value="2"/>
     <property name="props:enemyType" value="3"/>
     <property name="props:patrolDirection" value="-1"/>
     <property name="props:patrolRadius" value="32"/>
@@ -62,7 +61,7 @@
   </object>
   <object name="swing" type="PendulumSpawn" x="816" y="157">
    <properties>
-    <property name="props:radius" value="60"/>
+    <property name="props:radius" value="80"/>
    </properties>
    <ellipse/>
   </object>
