@@ -12,9 +12,9 @@
  <tileset firstgid="56" name="Streetlight tileset" tilewidth="32" tileheight="32">
   <image source="Streetlight tileset.png" width="224" height="96"/>
  </tileset>
- <layer name="Tile Layer 1" width="100" height="20">
+ <layer name="Tile Layer" width="100" height="20">
   <data encoding="base64" compression="zlib">
-   eJztWMluAjEMnYLKUrEUlR6hF9oP4IBaChx64/9/qG8OkSwriyfLxFXnSU8yUsQ4tvMcp2l04QEcgeMC/z0Dl+AKXFjsJ6FfJX3UhjZm88Yfm1iswS34Cr5Y7I3Qr5I+akMbs+fGH5tYtHU9Aafgo8X21Tv1q6SP2jDolS4MeqULg17pwpEwN1L06uigVhzAd/CjtiMepOjVgPwwfdhoFLf/Q3/uihOhDaGYcpvC9GGjUdwu0Z8/wS/wDH6DF/AK3ix7mRT4fipCd8lQTLlNYfqw0Shud9WrHbgH34Trf9hvvpdlx+/3gdBdMhRTbmsCzwffy7YHH1xzlOsc0Ltk7AyWa17LfUfh+bDBp2854JqjXOeAxjJ2Bqsxr0lqR5KPlPU+nwxcc5RrpqKxjJ3BasxrktrpOx856jJHLGN1rmt/ppDUTs58SPqAlncErW9NqfmQaDm1tbx7umq19httaj4kWk5tTbVoQ+1zc09cL6mzv/TuWdtXST5+AXrWGxA=
+   eJztWMtOAzEMXECUUtECanuEXoAP6IkC5dBb//+HOnuIZFl5eBNnY8SONJIrRV3HdsZxus4WrsBr8KbCf8/BJbgCHzz2QuhXTR+toY/ZfRePTS4ewQ24Bdce+1noV00fraGP2VMXj00u+rqegXfgrceO1Tv1q6aP1jDplS1MemULk17Zwp5QGyV6tQ/QKt7Ad/CjtSMRlOjVBH24Puw0itv/oT9rIxVTblO4Puw0its1+vMneAC/wG/wBzyCv569zCp8vxSpu2QqptymcH3YaRS3h+rVC/gK7oTrT+w338ty4PfHQOoumYopty2B54PvZTOCD6E5KnQO6F0ydwbTmte07yg8Hz7E9E0DoTkqdA5oLHNnsBbzmqR2JPkoWR/zySE0R4VmKhrL3BmsxbwmqZ2x86FRlxqxzNW5of2ZQlI7mvmQ9AEr7whW35pK8yHRcmpbefcM1WrrN9rSfEi0nNqWatGH1ufmXLheUmd/6d2zta+SfFwA93kabg==
   </data>
  </layer>
  <objectgroup name="Enemy" width="100" height="20">
@@ -64,7 +64,6 @@
   <object name="Inhalant" type="InhalantSpawn" x="1664" y="264">
    <properties>
     <property name="props:aggroRadius" value="64"/>
-    <property name="props:attackSpeed" value="2"/>
     <property name="props:enemyType" value="3"/>
     <property name="props:patrolDirection" value="-1"/>
     <property name="props:patrolRadius" value="32"/>
@@ -74,7 +73,7 @@
   </object>
   <object name="swing" type="PendulumSpawn" x="622" y="253">
    <properties>
-    <property name="props:radius" value="60"/>
+    <property name="props:radius" value="80"/>
    </properties>
    <ellipse/>
   </object>
@@ -93,7 +92,7 @@
   <object name="Heroin" type="HeroinSpawn" x="2720" y="371">
    <properties>
     <property name="props:aggroRadius" value="96"/>
-    <property name="props:attackSpeed" value="2"/>
+    <property name="props:attackSpeed" value="1"/>
     <property name="props:bulletSpeed" value="2"/>
     <property name="props:enemyType" value="2"/>
     <property name="props:patrolDirection" value="1"/>
@@ -260,14 +259,6 @@
    <properties>
     <property name="props:IsPit" value=""/>
     <property name="props:bodyType" value="static"/>
-    <property name="props:friction" value="1"/>
-   </properties>
-  </object>
-  <object name="Spikes" type="Body" x="1154" y="292" width="93" height="29">
-   <properties>
-    <property name="props:IsSpike" value=""/>
-    <property name="props:bodyType" value="static"/>
-    <property name="props:bounce" value="1"/>
     <property name="props:friction" value="1"/>
    </properties>
   </object>
